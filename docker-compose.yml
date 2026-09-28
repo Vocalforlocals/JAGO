@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: jago_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: mota_admin
+      POSTGRES_PASSWORD: mota_secure_password_2026
+      POSTGRES_DB: jago_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: jago_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://mota_admin:mota_secure_password_2026@db:5432/jago_db
+      - SECRET_KEY=jago_sih26238_mota_secure_secret_key_2026
+    depends_on:
+      - db
+
+  admin_dashboard:
+    build:
+      context: ./admin_dashboard
+      dockerfile: Dockerfile
+    container_name: jago_admin_portal
+    restart: always
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
