@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cd admin_dashboard && npm install && npm run build"
+    "build": "npm --prefix admin_dashboard install && npm --prefix admin_dashboard run build"
   }
 }

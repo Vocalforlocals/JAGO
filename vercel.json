@@ -1,6 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd admin_dashboard && npm install --include=dev && npm run build",
   "outputDirectory": "admin_dashboard/dist",
   "rewrites": [
     {
