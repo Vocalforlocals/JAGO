@@ -5,7 +5,8 @@ import '../providers/app_state.dart';
 import 'documents_screen.dart';
 
 class JagoChatScreen extends StatefulWidget {
-  const JagoChatScreen({Key? key}) : super(key: key);
+  final bool isEmbedded;
+  const JagoChatScreen({Key? key, this.isEmbedded = false}) : super(key: key);
 
   @override
   State<JagoChatScreen> createState() => _JagoChatScreenState();
@@ -242,6 +243,7 @@ class _JagoChatScreenState extends State<JagoChatScreen> with SingleTickerProvid
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
+        automaticallyImplyLeading: !widget.isEmbedded,
         title: Row(
           children: [
             ClipRRect(

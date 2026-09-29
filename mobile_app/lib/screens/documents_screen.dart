@@ -5,7 +5,8 @@ import '../providers/app_state.dart';
 import '../widgets/status_badge.dart';
 
 class DocumentsScreen extends StatelessWidget {
-  const DocumentsScreen({Key? key}) : super(key: key);
+  final bool isEmbedded;
+  const DocumentsScreen({Key? key, this.isEmbedded = false}) : super(key: key);
 
   void _handleFetchAll(BuildContext context, AppState appState) async {
     final msg = await appState.fetchAllFromDigiLocker();
@@ -137,6 +138,7 @@ class DocumentsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Document Wallet'),
         backgroundColor: Colors.white,
+        automaticallyImplyLeading: !isEmbedded,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

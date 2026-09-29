@@ -23,20 +23,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _onBottomNavTapped(int index) {
     setState(() => _navIndex = index);
-    if (index == 0) return;
-    if (index == 1) {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const DocumentsScreen()))
-          .then((_) => setState(() => _navIndex = 0));
-    } else if (index == 2) {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const ScholarshipsScreen()))
-          .then((_) => setState(() => _navIndex = 0));
-    } else if (index == 3) {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const JagoChatScreen()))
-          .then((_) => setState(() => _navIndex = 0));
-    } else if (index == 4) {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()))
-          .then((_) => setState(() => _navIndex = 0));
-    }
   }
 
   @override
@@ -45,89 +31,111 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final profile = appState.profile;
     final incomeNeedsUpdate = profile.incomeStatus == 'expired';
 
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
-      appBar: AppBar(
-        title: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Image.asset(
-                'assets/images/logo.png',
-                width: 26,
-                height: 26,
-                fit: BoxFit.contain,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'JAGO',
-              style: TextStyle(
-                fontWeight: FontWeight.w900,
-                color: AppTheme.primaryGreen,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Stack(
+    final PreferredSizeWidget? currentAppBar = _navIndex == 0
+        ? AppBar(
+            title: Row(
               children: [
-                const Icon(Icons.notifications_outlined, color: AppTheme.textDark),
-                if (appState.unreadNotificationCount > 0)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(
-                        color: AppTheme.accentSaffron,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '${appState.unreadNotificationCount}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    width: 26,
+                    height: 26,
+                    fit: BoxFit.contain,
                   ),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'JAGO',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    color: AppTheme.primaryGreen,
+                    letterSpacing: 0.5,
+                  ),
+                ),
               ],
             ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.account_circle_outlined, color: AppTheme.textDark),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ProfileScreen()),
-              );
-            },
-          ),
-        ],
-      ),
+            actions: [
+              IconButton(
+                icon: Stack(
+                  children: [
+                    const Icon(Icons.notifications_outlined, color: AppTheme.textDark),
+                    if (appState.unreadNotificationCount > 0)
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: const BoxDecoration(
+                            color: AppTheme.accentSaffron,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            '${appState.unreadNotificationCount}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.account_circle_outlined, color: AppTheme.textDark),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                  );
+                },
+              ),
+            ],
+          )
+        : null;
+
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundLight,
+      appBar: currentAppBar,
       bottomNavigationBar: BottomNavBar(
         currentIndex: _navIndex,
         onTap: _onBottomNavTapped,
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await appState.refreshAllData();
-        },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      body: IndexedStack(
+        index: _navIndex,
+        children: [
+          _buildDashboardBody(context, appState, profile, incomeNeedsUpdate),
+          const DocumentsScreen(isEmbedded: true),
+          const ScholarshipsScreen(isEmbedded: true),
+          const JagoChatScreen(isEmbedded: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDashboardBody(
+    BuildContext context,
+    AppState appState,
+    dynamic profile,
+    bool incomeNeedsUpdate,
+  ) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        await appState.refreshAllData();
+      },
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
               // Greeting Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -310,10 +318,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SizedBox(height: 12),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const DocumentsScreen()),
-                          );
+                          setState(() => _navIndex = 1);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.accentSaffron,
@@ -342,10 +347,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: Icons.school_outlined,
                     color: AppTheme.primaryGreen,
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const ScholarshipsScreen()),
-                      );
+                      setState(() => _navIndex = 2);
                     },
                   ),
                   _buildSummaryTile(
@@ -375,10 +377,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: Icons.pending_actions_outlined,
                     color: incomeNeedsUpdate ? AppTheme.accentSaffron : AppTheme.primaryGreen,
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const DocumentsScreen()),
-                      );
+                      setState(() => _navIndex = 1);
                     },
                   ),
                   _buildSummaryTile(
@@ -416,10 +415,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       label: 'View Schemes',
                       icon: Icons.list_alt,
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const ScholarshipsScreen()),
-                        );
+                        setState(() => _navIndex = 2);
                       },
                     ),
                   ),
@@ -429,10 +425,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       label: 'Check Eligibility',
                       icon: Icons.rule,
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const ScholarshipsScreen()),
-                        );
+                        setState(() => _navIndex = 2);
                       },
                     ),
                   ),
@@ -442,10 +435,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       label: 'Open Wallet',
                       icon: Icons.folder,
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const DocumentsScreen()),
-                        );
+                        setState(() => _navIndex = 1);
                       },
                     ),
                   ),
@@ -465,8 +455,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildCheckItem(String label, bool isDone, {bool isWarning = false}) {

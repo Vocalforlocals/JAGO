@@ -7,7 +7,8 @@ import '../widgets/status_badge.dart';
 import 'application_prep_screen.dart';
 
 class ScholarshipsScreen extends StatefulWidget {
-  const ScholarshipsScreen({Key? key}) : super(key: key);
+  final bool isEmbedded;
+  const ScholarshipsScreen({Key? key, this.isEmbedded = false}) : super(key: key);
 
   @override
   State<ScholarshipsScreen> createState() => _ScholarshipsScreenState();
@@ -67,6 +68,7 @@ class _ScholarshipsScreenState extends State<ScholarshipsScreen> {
       appBar: AppBar(
         title: const Text('My Scholarships'),
         backgroundColor: Colors.white,
+        automaticallyImplyLeading: !widget.isEmbedded,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

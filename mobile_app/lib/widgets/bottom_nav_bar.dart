@@ -49,11 +49,6 @@ class BottomNavBar extends StatelessWidget {
             activeIcon: Icon(Icons.chat_bubble),
             label: 'JAGO AI',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
         ],
       ),
     );
