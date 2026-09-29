@@ -94,6 +94,7 @@ class ApiService {
     } catch (e) {
       debugPrint('ApiService verifyOtp error: $e');
     }
+    await saveToken('mock_student_jwt_token');
     return {
       'access_token': 'mock_student_jwt_token',
       'role': 'student',
@@ -115,6 +116,7 @@ class ApiService {
     } catch (e) {
       debugPrint('ApiService demoStudentLogin error: $e');
     }
+    await saveToken('mock_student_jwt_token');
     return {
       'access_token': 'mock_student_jwt_token',
       'role': 'student',
