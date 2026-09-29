@@ -44,10 +44,11 @@ class LandingScreen extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'National Scholarship Portal',
+                    'Janjatiya Awareness & Guidance for Opportunities',
                     style: TextStyle(
-                      fontSize: 10,
-                      color: AppTheme.textMuted,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primaryGreen,
                     ),
                   ),
                 ],
@@ -169,7 +170,20 @@ class LandingScreen extends StatelessWidget {
                 letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
+            Text(
+              isHindi
+                ? 'जनजातीय जागरूकता एवं अवसरों के लिए मार्गदर्शन'
+                : 'Janjatiya Awareness & Guidance for Opportunities',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Colors.green.shade800,
+                letterSpacing: 0.2,
+              ),
+            ),
+            const SizedBox(height: 8),
             Text(
               isHindi
                 ? 'एक छात्र। एक सत्यापित प्रोफ़ाइल। पाँच छात्रवृत्ति योजनाएँ।'

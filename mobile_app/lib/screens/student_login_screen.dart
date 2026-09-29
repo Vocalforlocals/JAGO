@@ -341,6 +341,12 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
         ),
         const SizedBox(height: 4),
         const Text(
+          'Janjatiya Awareness & Guidance for Opportunities',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: AppTheme.primaryGreen, fontWeight: FontWeight.w700, letterSpacing: 0.2),
+        ),
+        const SizedBox(height: 2),
+        const Text(
           'National Scholarship Portal • Student Login',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 11, color: AppTheme.textMuted, fontWeight: FontWeight.w500, letterSpacing: 0.2),
