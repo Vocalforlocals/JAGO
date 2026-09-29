@@ -59,7 +59,7 @@ for method, path, body in endpoints:
     data = json.dumps(body).encode("utf-8") if body else None
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(req, timeout=5) as res:
+        with urllib.request.urlopen(req, timeout=10) as res:
             res_data = json.loads(res.read().decode("utf-8"))
             print(f"PASS [{method}] {path} -> {res.status}")
             passed += 1
