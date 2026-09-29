@@ -55,13 +55,14 @@ class _JagoChatScreenState extends State<JagoChatScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryGreen.withOpacity(0.1),
-                shape: BoxShape.circle,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.asset(
+                'assets/images/logo.png',
+                width: 24,
+                height: 24,
+                fit: BoxFit.contain,
               ),
-              child: const Text('🤖', style: TextStyle(fontSize: 18)),
             ),
             const SizedBox(width: 8),
             Column(
@@ -69,7 +70,7 @@ class _JagoChatScreenState extends State<JagoChatScreen> {
               children: [
                 const Text('JAGO AI', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 Text(
-                  isHindi ? 'जनजातीय छात्रवृत्ति सहायक' : 'Scholarship Assistant',
+                  isHindi ? 'छात्रवृत्ति सहायक' : 'Scholarship Assistant',
                   style: const TextStyle(fontSize: 10, color: AppTheme.textMuted),
                 ),
               ],
@@ -105,8 +106,8 @@ class _JagoChatScreenState extends State<JagoChatScreen> {
                 Expanded(
                   child: Text(
                     isHindi
-                      ? 'जागो केवल जनजातीय कार्य मंत्रालय (MoTA) के अनुमोदित नियमों से उत्तर देता है।'
-                      : 'JAGO answers strictly from approved MoTA knowledge base. State-aware demo mode.',
+                      ? 'जागो आधिकारिक छात्रवृत्ति नियमों के आधार पर उत्तर देता है।'
+                      : 'JAGO answers strictly from official scholarship guidelines.',
                     style: const TextStyle(fontSize: 10, color: AppTheme.nationalNavy, fontWeight: FontWeight.w500),
                   ),
                 ),

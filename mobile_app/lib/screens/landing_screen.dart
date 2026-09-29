@@ -20,29 +20,31 @@ class LandingScreen extends StatelessWidget {
         elevation: 0,
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryGreen.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/images/logo.png',
+                width: 32,
+                height: 32,
+                fit: BoxFit.contain,
               ),
-              child: const Text('🎓', style: TextStyle(fontSize: 18)),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
             const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'JAGO — MoTA',
+                    'JAGO',
                     style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
                       color: AppTheme.textDark,
+                      letterSpacing: 0.5,
                     ),
                   ),
                   Text(
-                    'Ministry of Tribal Affairs',
+                    'National Scholarship Portal',
                     style: TextStyle(
                       fontSize: 10,
                       color: AppTheme.textMuted,
@@ -123,9 +125,21 @@ class LandingScreen extends StatelessWidget {
                 children: [
                   const SizedBox(height: 10),
 
-            // Ministry Emblem Header
+            // App Logo
+            ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Image.asset(
+                'assets/images/logo.png',
+                width: 76,
+                height: 76,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Header Badge
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
                 color: AppTheme.primaryGreen.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(20),
@@ -133,8 +147,8 @@ class LandingScreen extends StatelessWidget {
               ),
               child: Text(
                 isHindi
-                  ? 'जनजातीय कार्य मंत्रालय • भारत सरकार'
-                  : 'Ministry of Tribal Affairs • Government of India',
+                  ? 'राष्ट्रीय छात्रवृत्ति पोर्टल'
+                  : 'National Scholarship Portal',
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -248,8 +262,8 @@ class LandingScreen extends StatelessWidget {
               icon: Icons.badge_outlined,
               title: isHindi ? 'एकीकृत प्रोफ़ाइल (Unified Profile)' : 'Unified Profile',
               desc: isHindi
-                ? 'पाँचों योजनाओं (Pre, Post, Top Class, NFST, NOS) के लिए एक ही सत्यापित प्रोफ़ाइल।'
-                : 'One verified profile for all five MoTA scholarship schemes.',
+                ? 'पाँचों योजनाओं (Pre, Post, Top Class, National Fellowship, NOS) के लिए एक ही सत्यापित प्रोफ़ाइल।'
+                : 'One verified profile for all scholarship schemes.',
               accentColor: AppTheme.primaryGreen,
             ),
             const SizedBox(height: 12),
@@ -267,7 +281,7 @@ class LandingScreen extends StatelessWidget {
               title: isHindi ? 'स्थिति-जागरूक AI (State-Aware JAGO)' : 'State-Aware Chatbot',
               desc: isHindi
                 ? 'जागो बॉट आपके आवेदन की वास्तविक स्थिति और नियमों को जानता है।'
-                : 'JAGO knows your actual application status and official MoTA rules.',
+                : 'JAGO knows your actual application status and scholarship guidelines.',
               accentColor: AppTheme.accentSaffron,
             ),
 
@@ -282,7 +296,7 @@ class LandingScreen extends StatelessWidget {
                 border: Border.all(color: Colors.grey.shade200),
               ),
               child: const Text(
-                'National Unified ST Scholarship Verification & Sanction Portal\nMinistry of Tribal Affairs • Government of India',
+                'JAGO — National Unified Scholarship Portal\nGovernment of India',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 11, color: AppTheme.textMuted, height: 1.4),
               ),

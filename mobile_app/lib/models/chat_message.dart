@@ -15,7 +15,7 @@ class ChatMessage {
     return [
       ChatMessage(
         sender: 'bot',
-        text: 'Hello Rahul! I am JAGO, your dedicated scholarship assistant for the Ministry of Tribal Affairs. How can I assist you today?',
+        text: 'Hello Rahul! I am JAGO, your dedicated scholarship assistant. How can I assist you today?',
         timestamp: '10:00 AM',
         options: ['Check Status', 'Check Eligibility', 'Required Documents', 'Payment Status', 'How to Apply'],
       ),
@@ -26,7 +26,7 @@ class ChatMessage {
       ),
       ChatMessage(
         sender: 'bot',
-        text: 'Your application ST-2026-001245 for Post-Matric Scholarship is currently Under Government Verification. It has been routed to the MoTA Manual Review queue for institution alias validation. No action is required from your side!',
+        text: 'Your application ST-2026-001245 for Post-Matric Scholarship is currently Under Verification. It has been routed to the Manual Review queue for institution alias validation. No action is required from your side!',
         timestamp: '10:01 AM',
         options: ['Check Payments', 'Required Documents', 'Help'],
       ),
@@ -37,7 +37,7 @@ class ChatMessage {
       ),
       ChatMessage(
         sender: 'bot',
-        text: 'As per Ministry guidelines, income certificates are valid for 12 months. Your previous certificate from March 2023 has expired. Revalidating it for FY 2026-27 allows instant reuse across all eligible schemes.',
+        text: 'As per official scholarship guidelines, income certificates are valid for 12 months. Your previous certificate from March 2023 has expired. Revalidating it for FY 2026-27 allows instant reuse across all eligible schemes.',
         timestamp: '10:02 AM',
         options: ['Open Document Wallet', 'View Schemes'],
       ),

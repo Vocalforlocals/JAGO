@@ -170,7 +170,7 @@ class DocumentsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             const Text(
-              'Certificates verified here are stored once and reused across all 5 MoTA schemes.',
+              'Certificates verified here are stored once and reused across all scholarship schemes.',
               style: TextStyle(fontSize: 11, color: AppTheme.textMuted),
             ),
 
@@ -302,7 +302,7 @@ class DocumentsScreen extends StatelessWidget {
             // Footer
             Center(
               child: Text(
-                'DigiLocker & State e-District API Integration • MoTA Secure Sandbox',
+                'DigiLocker & State e-District API Integration • Secure Sandbox',
                 style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
               ),
             ),

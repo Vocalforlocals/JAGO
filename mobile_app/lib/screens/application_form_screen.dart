@@ -182,7 +182,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Your application has been registered on the unified MoTA platform.',
+              'Your application has been registered on the unified platform.',
               style: TextStyle(fontSize: 12),
             ),
             const SizedBox(height: 12),
@@ -351,7 +351,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                   child: Padding(
                     padding: EdgeInsets.only(top: 12),
                     child: Text(
-                      'I hereby declare that all details are accurate, and I agree to avail only one scholarship benefit in accordance with MoTA policies.',
+                      'I hereby declare that all details are accurate, and I agree to avail only one scholarship benefit in accordance with official scholarship policies.',
                       style: TextStyle(fontSize: 11, color: AppTheme.textDark, height: 1.35),
                     ),
                   ),

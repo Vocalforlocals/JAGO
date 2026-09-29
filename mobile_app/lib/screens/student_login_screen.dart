@@ -309,22 +309,23 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
           ),
         ),
         const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: AppTheme.primaryGreen.withOpacity(0.08),
-            shape: BoxShape.circle,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Image.asset(
+            'assets/images/logo.png',
+            width: 68,
+            height: 68,
+            fit: BoxFit.contain,
           ),
-          child: const Text('🏛️', style: TextStyle(fontSize: 34)),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         const Text(
           'JAGO Portal',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.textDark),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppTheme.textDark),
         ),
         const SizedBox(height: 4),
         const Text(
-          'Ministry of Tribal Affairs • Government of India',
+          'National Scholarship Portal • Student Login',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 11, color: AppTheme.textMuted, fontWeight: FontWeight.w500, letterSpacing: 0.2),
         ),
@@ -860,7 +861,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
       ('🏫', 'Institute Nodal', '2-3 days'),
       ('🏙️', 'District Officer', '3-5 days'),
       ('🏛️', 'State Nodal', '5-7 days'),
-      ('✅', 'MoTA Final Approval', '7-10 days'),
+      ('✅', 'Central Final Approval', '7-10 days'),
     ];
     return Container(
       padding: const EdgeInsets.all(12),
@@ -1018,7 +1019,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
       Text('Are you a scholarship officer?',
           style: TextStyle(fontSize: 11, color: AppTheme.textMuted)),
       SizedBox(height: 2),
-      Text('Access MoTA Admin Portal on Desktop',
+      Text('Access Admin Portal on Desktop',
           style: TextStyle(
               fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryGreen)),
     ]);

@@ -31,7 +31,7 @@ class _ScholarshipsScreenState extends State<ScholarshipsScreen> {
           ],
         ),
         content: const Text(
-          'Under Ministry of Tribal Affairs regulations, a student can avail only ONE scholarship at any given time.\n\nApplying for Post-Matric Scholarship will be your primary active benefit.',
+          'Under national scholarship regulations, a student can avail only ONE scholarship at any given time.\n\nApplying for Post-Matric Scholarship will be your primary active benefit.',
           style: TextStyle(fontSize: 12, height: 1.4),
         ),
         actions: [
@@ -84,7 +84,7 @@ class _ScholarshipsScreenState extends State<ScholarshipsScreen> {
             ),
             const SizedBox(height: 2),
             const Text(
-              'MoTA administers 5 schemes across secondary, higher, research, and overseas education.',
+              'Portal administers 5 schemes across secondary, higher, research, and overseas education.',
               style: TextStyle(fontSize: 11, color: AppTheme.textMuted),
             ),
 
@@ -155,7 +155,7 @@ class _ScholarshipsScreenState extends State<ScholarshipsScreen> {
             const SizedBox(height: 20),
 
             const Text(
-              'Available Ministry of Tribal Affairs Schemes',
+              'Available Scholarship Schemes',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textDark),
             ),
             const SizedBox(height: 10),

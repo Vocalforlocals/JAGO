@@ -31,7 +31,7 @@ class JagoApp extends StatelessWidget {
       ],
       child: MaterialApp(
         navigatorKey: appNavigatorKey,
-        title: 'JAGO — Ministry of Tribal Affairs',
+        title: 'JAGO — National Scholarship Portal',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         builder: (context, child) => DeviceFrameWrapper(

@@ -254,15 +254,15 @@ class AppState extends ChangeNotifier {
 
     await ApiService.runVerification(_application.id);
 
-    _application.stage = 'Under Government Verification';
-    _application.status = 'Routed to MoTA Manual Review';
+    _application.stage = 'Under Verification';
+    _application.status = 'Routed to Manual Review';
 
     _notifications.insert(
       0,
       NotificationItem(
         id: DateTime.now().millisecondsSinceEpoch,
-        title: 'Application Moved to Government Verification',
-        message: 'Institution alias discrepancy detected. Your application has been routed to the MoTA Manual Review Queue (Case #VR-10245).',
+        title: 'Application Moved to Verification',
+        message: 'Institution alias discrepancy detected. Your application has been routed to the Manual Review Queue (Case #VR-10245).',
         date: 'Today',
         isRead: false,
         type: 'info',

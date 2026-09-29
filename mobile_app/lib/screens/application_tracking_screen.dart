@@ -199,7 +199,7 @@ class ApplicationTrackingScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Your certificates are active. Discrepancy review is queued at the MoTA officer desk.',
+                          'Your certificates are active. Discrepancy review is queued at the verification officer desk.',
                           style: TextStyle(fontSize: 10, color: AppTheme.textMuted),
                         ),
                       ],
@@ -222,7 +222,7 @@ class ApplicationTrackingScreen extends StatelessWidget {
 
             Center(
               child: Text(
-                'Ministry of Tribal Affairs • Government of India',
+                'National Scholarship Portal • Government of India',
                 style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
               ),
             ),

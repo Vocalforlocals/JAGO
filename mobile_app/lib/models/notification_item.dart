@@ -30,8 +30,8 @@ class NotificationItem {
     return [
       NotificationItem(
         id: 1,
-        title: 'Application moved to Government Verification',
-        message: 'Your Post-Matric Scholarship application has been routed to the MoTA Manual Review queue for institutional record alignment.',
+        title: 'Application moved to Verification',
+        message: 'Your Post-Matric Scholarship application has been routed to the Manual Review queue for institutional record alignment.',
         date: '12 Sep 2026',
         isRead: false,
         type: 'info',

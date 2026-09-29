@@ -324,7 +324,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                         Icon(Icons.shield_outlined, color: AppTheme.primaryGreen, size: 22),
                         SizedBox(width: 8),
                         Text(
-                          'Routed to MoTA Manual Review Queue',
+                          'Routed to Manual Review Queue',
                           style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.primaryGreen),
                         ),
                       ],

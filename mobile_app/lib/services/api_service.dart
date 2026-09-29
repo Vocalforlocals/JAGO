@@ -345,8 +345,8 @@ class ApiService {
     }
     return {
       'reply': isHindi
-          ? 'मैं MoTA छात्रवृत्ति नियमों और आपकी प्रोफ़ाइल स्थिति के आधार पर सहायता करता हूँ।'
-          : 'I am JAGO, your Ministry of Tribal Affairs assistant. How can I help you today?',
+          ? 'मैं आधिकारिक छात्रवृत्ति नियमों और आपकी प्रोफ़ाइल स्थिति के आधार पर सहायता करता हूँ।'
+          : 'I am JAGO, your scholarship assistant. How can I help you today?',
       'options': ['Check Status', 'Check Eligibility', 'Required Documents', 'Payment Status', 'How to Apply'],
     };
   }
