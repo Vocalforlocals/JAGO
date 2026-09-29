@@ -9,6 +9,9 @@ class PaymentRecord {
   final String status;
   final String mode;
   final String bankAccount;
+  final String sanctionNumber;
+  final String utrNumber;
+  final String pfmsStatus;
 
   PaymentRecord({
     required this.id,
@@ -21,6 +24,9 @@ class PaymentRecord {
     required this.status,
     required this.mode,
     required this.bankAccount,
+    this.sanctionNumber = 'SAN-2026-ST-7721',
+    this.utrNumber = 'UTR98412894124',
+    this.pfmsStatus = 'Settled via NPCI Aadhaar Payment Bridge',
   });
 
   factory PaymentRecord.fromJson(Map<String, dynamic> json) {
@@ -35,6 +41,9 @@ class PaymentRecord {
       status: json['status'] ?? 'Payment Credited',
       mode: json['mode'] ?? 'DBT',
       bankAccount: json['bank_account'] ?? '****1234',
+      sanctionNumber: json['sanction_number'] ?? 'SAN-2026-ST-7721',
+      utrNumber: json['utr_number'] ?? 'UTR98412894124',
+      pfmsStatus: json['pfms_status'] ?? 'Settled via NPCI Aadhaar Payment Bridge',
     );
   }
 
@@ -51,6 +60,9 @@ class PaymentRecord {
         status: 'Payment Credited',
         mode: 'DBT (Direct Benefit Transfer)',
         bankAccount: '****1234',
+        sanctionNumber: 'SAN-2026-ST-7721',
+        utrNumber: 'UTR98412894124',
+        pfmsStatus: 'Settled via NPCI Aadhaar Payment Bridge',
       ),
       PaymentRecord(
         id: 2,
@@ -63,6 +75,9 @@ class PaymentRecord {
         status: 'Not Applied',
         mode: '—',
         bankAccount: '—',
+        sanctionNumber: '—',
+        utrNumber: '—',
+        pfmsStatus: 'Not Disbursed',
       ),
     ];
   }

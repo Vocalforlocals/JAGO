@@ -189,6 +189,9 @@ class PaymentItem(BaseModel):
     status: str
     mode: str
     bank_account: str
+    sanction_number: Optional[str] = "SAN-2026-ST-7721"
+    utr_number: Optional[str] = "UTR98412894124"
+    pfms_status: Optional[str] = "Settled via NPCI Aadhaar Payment Bridge"
 
 class PaymentSummaryResponse(BaseModel):
     total_sanctioned: int
