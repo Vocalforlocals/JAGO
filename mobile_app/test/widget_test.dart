@@ -6,8 +6,9 @@ void main() {
     await tester.pumpWidget(const JagoApp());
     await tester.pumpAndSettle();
 
-    // Verify JAGO title appears
-    expect(find.text('JAGO'), findsOneWidget);
+    // Verify JAGO title and official branding appears
+    expect(find.text('JAGO'), findsWidgets);
+    expect(find.textContaining('Janjatiya Awareness & Guidance for Opportunities'), findsWidgets);
     expect(find.text('Student Login'), findsOneWidget);
   });
 }

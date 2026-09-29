@@ -67,7 +67,7 @@ def get_review_queue(
             authorized_data=c.authorized_data,
             possible_reasons=c.possible_reasons,
             resolution_notes=c.resolution_notes,
-            created_at=c.created_at.strftime("%d %b %Y") if c.created_at else "28 Sept 2026"
+            created_at=c.created_at.strftime("%d %b %Y") if hasattr(c.created_at, "strftime") else (str(c.created_at) if c.created_at else "28 Sept 2026")
         ))
     return results
 
@@ -95,7 +95,7 @@ def get_review_case(case_id: str, db: Session = Depends(get_db)):
         authorized_data=case.authorized_data,
         possible_reasons=case.possible_reasons,
         resolution_notes=case.resolution_notes,
-        created_at=case.created_at.strftime("%d %b %Y") if case.created_at else "28 Sept 2026"
+        created_at=case.created_at.strftime("%d %b %Y") if hasattr(case.created_at, "strftime") else (str(case.created_at) if case.created_at else "28 Sept 2026")
     )
 
 @router.post("/reviews/{case_id}/action")

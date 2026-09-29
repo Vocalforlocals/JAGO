@@ -41,12 +41,16 @@ app.add_middleware(
 async def add_security_headers_and_guards(request, call_next):
     # Enforce maximum body size protection (10MB)
     content_length = request.headers.get("content-length")
-    if content_length and int(content_length) > 10 * 1024 * 1024:
-        from starlette.responses import JSONResponse
-        return JSONResponse(
-            status_code=413,
-            content={"detail": "Payload Too Large. Maximum allowed size is 10MB."}
-        )
+    if content_length:
+        try:
+            if int(content_length) > 10 * 1024 * 1024:
+                from starlette.responses import JSONResponse
+                return JSONResponse(
+                    status_code=413,
+                    content={"detail": "Payload Too Large. Maximum allowed size is 10MB."}
+                )
+        except (ValueError, TypeError):
+            pass
 
     response = await call_next(request)
     
