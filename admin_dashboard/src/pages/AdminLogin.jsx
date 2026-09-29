@@ -49,7 +49,7 @@ export default function AdminLogin({ onLoginSuccess }) {
           Officer Review Portal
         </h2>
         <p className="mt-1 text-center text-sm text-slate-400">
-          Ministry of Tribal Affairs • Government of India
+          National Unified Scholarship Platform • Central Verification
         </p>
         <p className="text-center text-xs text-emerald-400 font-semibold mt-1">
           JAGO National Verification & Discrepancy Resolution Engine

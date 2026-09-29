@@ -1,7 +1,7 @@
 const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE)
   ? import.meta.env.VITE_API_BASE
-  : (typeof window !== 'undefined' && window.location.hostname)
-    ? `http://${window.location.hostname}:8000/api`
+  : (typeof window !== 'undefined' && window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')
+    ? 'https://jago-dr69.onrender.com/api'
     : 'http://127.0.0.1:8000/api';
 
 export const adminApi = {
@@ -19,8 +19,8 @@ export const adminApi = {
       return {
         access_token: 'demo_token_officer',
         role: 'officer',
-        username: 'officer_mota',
-        full_name: 'Dr. Ananya Sharma (MoTA Review Officer)'
+        username: 'officer_review',
+        full_name: 'Dr. Ananya Sharma (Senior Review Officer)'
       };
     }
   },

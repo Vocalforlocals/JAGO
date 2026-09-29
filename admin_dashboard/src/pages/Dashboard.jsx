@@ -37,7 +37,7 @@ export default function Dashboard() {
       <div className="p-8 flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-3">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600 mx-auto"></div>
-          <p className="text-sm text-slate-500 font-medium">Aggregating MoTA Scholarship Statistics...</p>
+          <p className="text-sm text-slate-500 font-medium">Aggregating National Scholarship Statistics...</p>
         </div>
       </div>
     );
@@ -49,7 +49,7 @@ export default function Dashboard() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">MoTA Admin Dashboard</h1>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">National Officer Dashboard</h1>
             <span className="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-semibold border border-emerald-300">
               Live Mock Stream
             </span>
@@ -98,7 +98,7 @@ export default function Dashboard() {
           value={stats.applications_submitted.toLocaleString()}
           icon={FileText}
           color="indigo"
-          change="Across 5 MoTA Schemes"
+          change="Across All Central Schemes"
         />
         <StatCard
           title="Under Verification"
@@ -183,7 +183,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* MoTA Core Principles & Layer Status */}
+        {/* JAGO Core Principles & Layer Status */}
         <div className="bg-white rounded-xl border border-slate-200/90 p-6 shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center space-x-2 mb-4">
@@ -199,7 +199,7 @@ export default function Dashboard() {
 
               <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
                 <span className="font-bold text-slate-800 block mb-0.5">Level 2: Scheme Eligibility Engine</span>
-                <span>Rule-based evaluation across all 5 MoTA schemes with automated one-scheme rule enforcement.</span>
+                <span>Rule-based evaluation across all national scholarship schemes with automated one-scheme rule enforcement.</span>
               </div>
 
               <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
@@ -225,7 +225,7 @@ export default function Dashboard() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Officer Operations</span>
-              <span className="text-xs bg-slate-800 text-emerald-400 px-2.5 py-0.5 rounded border border-emerald-700/60 font-medium">MoTA Portal</span>
+              <span className="text-xs bg-slate-800 text-emerald-400 px-2.5 py-0.5 rounded border border-emerald-700/60 font-medium">National Portal</span>
             </div>
             <h3 className="text-base font-bold text-white mb-2">Pending Manual Verification Cases</h3>
             <p className="text-xs text-slate-300 leading-relaxed mb-6">

@@ -165,7 +165,7 @@ export default function VerificationLayer() {
       </div>
 
       <div className="text-center text-xs text-slate-400 pt-4">
-        Simulated Verification Integration Layer • Ministry of Tribal Affairs, Government of India
+        Simulated Verification Integration Layer • National Unified Scholarship Platform
       </div>
     </div>
   );

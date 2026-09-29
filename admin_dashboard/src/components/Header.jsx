@@ -19,7 +19,7 @@ export default function Header({ user, onLogout }) {
             </span>
           </div>
           <p className="text-xs text-slate-500 font-medium">
-            Ministry of Tribal Affairs, Govt of India • National Scholarship Verification
+            National Unified Scholarship Platform • Central Verification Portal
           </p>
         </div>
       </div>
@@ -42,7 +42,7 @@ export default function Header({ user, onLogout }) {
             <p className="text-xs font-semibold text-slate-800 leading-tight">
               Dr. Ananya Sharma
             </p>
-            <p className="text-[11px] text-slate-500">MoTA Verification Officer</p>
+            <p className="text-[11px] text-slate-500">National Verification Officer</p>
           </div>
         </div>
 
