@@ -36,6 +36,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Security Headers & Request Guard Middleware
+@app.middleware("http")
+async def add_security_headers_and_guards(request, call_next):
+    # Enforce maximum body size protection (10MB)
+    content_length = request.headers.get("content-length")
+    if content_length and int(content_length) > 10 * 1024 * 1024:
+        from starlette.responses import JSONResponse
+        return JSONResponse(
+            status_code=413,
+            content={"detail": "Payload Too Large. Maximum allowed size is 10MB."}
+        )
+
+    response = await call_next(request)
+    
+    # Standard National Informatics & OWASP Security Headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Server"] = "JAGO-GovSec-Engine"
+    return response
+
 # Include Routers
 app.include_router(auth.router)
 app.include_router(student.router)
