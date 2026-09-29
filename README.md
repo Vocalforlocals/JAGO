@@ -1,6 +1,6 @@
-### Ministry of Tribal Affairs, Government of India
-**National ST Scholarship Access, Verification & Discrepancy Resolution System**  
-**Tagline:** *"One Student. One Verified Profile. One Dashboard. Five Scholarship Schemes."*  
+# 🌟 JAGO — Janjatiya Awareness & Guidance for Opportunities
+### National Unified Scholarship Access & Multi-Source Verification Orchestrator
+**Tagline:** *"One Student. One Verified Profile. One Dashboard. Multiple Scholarship Schemes."*  
 **Secondary Message:** *"Reuse what is verified. Revalidate what changes. Route what needs review."*
 
 ---
@@ -29,28 +29,30 @@ flowchart TD
         S1["One Verified Profile"]
         S2["Reusable Document Wallet"]
         S3["Rule-Based Eligibility Engine"]
-        S4["JAGO AI Chatbot (RAG + Context)"]
+        S4["JAGO AI Voice & Diagnostics Assistant"]
+        S5["Transparent DBT / PFMS Tracking"]
     end
 
     subgraph CoreBackend["JAGO Unified Core (FastAPI + PostgreSQL)"]
         B1["OTP + JWT Authentication"]
-        B2["Document OCR Service"]
+        B2["Document OCR & Validation Service"]
         B3["Verification Orchestrator (8 Automated Checks)"]
-        B4["Tolerance & Discrepancy Router"]
+        B4["Fuzzy Matcher & Zero Auto-Rejection Tolerance Engine"]
+        B5["Proactive Saturation & Outreach Coordinator"]
     end
 
     subgraph AdminLayer["Administrative Portal (React.js + Tailwind)"]
-        A1["MoTA Dashboard (8 KPI Metrics)"]
-        A2["Manual Review Queue (Case #VR-10245)"]
+        A1["MoTA Dashboard (Real-time KPIs)"]
+        A2["Manual Review Queue (Human-in-the-Loop Mismatch Resolution)"]
         A3["Unreached Students Saturation Engine"]
-        A4["Integration Layer Monitor"]
+        A4["Outreach Mobilization Drawer (CSC Vans, CDAC SMS)"]
     end
 
     subgraph GovRepos["Authoritative Government Repositories (Mock / Integration Layer)"]
         G1["UIDAI (Aadhaar e-KYC)"]
         G2["DigiLocker (Certified Vault)"]
         G3["State e-District (Caste, Domicile, Revenue)"]
-        G4["AISHE (College Directory)"]
+        G4["AISHE (College Directory & Aliases)"]
         G5["UDISE+ & APAAR (School & Academic Bank)"]
         G6["PFMS (Aadhaar Payment Bridge - DBT)"]
     end
@@ -67,16 +69,16 @@ flowchart TD
 
 | Component | Technology | Role |
 | :--- | :--- | :--- |
-| 📱 **Mobile App** | **Flutter (Dart)** | Full student workflow across 13 screens with bottom navigation and bilingual support |
-| ⚙️ **Backend** | **FastAPI (Python 3.11+)** | High-performance async REST API, SQLAlchemy ORM, verification pipelines |
+| 📱 **Mobile App** | **Flutter (Dart)** | Full student workflow across 13 screens with persistent 4-tab navigation and bilingual support |
+| ⚙️ **Backend** | **FastAPI (Python 3.11+)** | High-performance async REST API, SQLAlchemy ORM, verification pipelines, OWASP security headers |
 | 🗄️ **Database** | **PostgreSQL / SQLite** | Relational schema with auto-seed logic for Rahul Kumar and MoTA records |
 | 🔐 **Authentication** | **OTP + JWT** | Mobile number OTP generation + verification (Demo: `123456`) and Officer credentials |
-| 🤖 **JAGO AI Chatbot** | **Python + RAG Engine** | State-aware chatbot grounded strictly in official MoTA scheme rules; English & Hindi |
+| 🤖 **JAGO AI Voice Assistant**| **Python + Multilingual Engine**| Interactive voice input, TTS speech, and 4-step document renewal diagnostic roadmap |
 | 📄 **Document / OCR** | **Python OCR Service** | Extracts certificate numbers, dates, income limits, and automates revalidation |
 | 🧪 **Gov Integrations** | **Mock Integration Layer** | Clearly labeled simulation for UIDAI, DigiLocker, AISHE, APAAR, UDISE+, e-District |
 | 🔔 **Notifications** | **In-App Event Dispatcher** | Real-time push/in-app notices reflecting review approvals and disbursals |
 | 👨‍💼 **Admin Dashboard** | **React 18 + Vite + Tailwind** | Desktop-first officer portal with manual review queue and unreached student finder |
-| 📦 **Deployment** | **Docker + Compose** | Multi-container dockerization for instant cloud/local deployment |
+| 📦 **Deployment** | **Docker + Vercel + Render**| Multi-tier deployment ready for immediate demonstration |
 
 ---
 
@@ -84,43 +86,49 @@ flowchart TD
 
 ```
 Jago/
-├── backend/                        # FastAPI Backend & JAGO AI Engine
+├── backend/                            # FastAPI Backend & JAGO Verification Core
 │   ├── app/
-│   │   ├── routes/                 # auth.py, student.py, admin.py
-│   │   ├── services/               # mock_gov_integrations.py, verification_orchestrator.py, ocr_service.py, jago_ai.py
-│   │   ├── config.py               # Environment configuration
-│   │   ├── database.py             # SQLAlchemy session & engine
-│   │   ├── models.py               # Database schemas (Users, Profiles, Documents, Schemes, etc.)
-│   │   ├── schemas.py              # Pydantic request/response models
-│   │   ├── seed.py                 # Automatic database seeding script
-│   │   └── main.py                 # App entrypoint & CORS middleware
-│   ├── requirements.txt            # Python dependencies
-│   └── Dockerfile                  # Backend container specification
-├── admin_dashboard/                # React.js Admin Portal
+│   │   ├── routes/                     # auth.py, student.py, admin.py
+│   │   ├── services/                   # mock_gov_integrations.py, verification_orchestrator.py, fuzzy_matcher.py, jago_ai.py
+│   │   ├── config.py                   # Environment configuration & JWT secrets
+│   │   ├── database.py                 # SQLAlchemy session & database engine
+│   │   ├── models.py                   # Relational database models
+│   │   ├── schemas.py                  # Pydantic request / response schemas
+│   │   ├── seed.py                     # Demo data population logic
+│   │   └── main.py                     # FastAPI entrypoint, CORS & OWASP security headers
+│   ├── requirements.txt                # Python dependencies
+│   ├── Dockerfile                      # Backend container specification
+│   ├── test_full_lifecycle.py          # Master 7-stage end-to-end integration test
+│   ├── test_fuzzy_verification.py      # Fuzzy matcher & zero-rejection tolerance unit test
+│   ├── test_saturation_engine.py       # Saturation metrics & outreach campaign test
+│   ├── test_ai_diagnostics.py          # AI voice & document renewal roadmap test
+│   └── test_dbt_pfms.py                # PFMS settlement & digital sanction receipt test
+├── admin_dashboard/                    # React.js Officer Administration Portal
 │   ├── src/
-│   │   ├── components/             # Header, Sidebar, StatCard, Toast
-│   │   ├── pages/                  # Dashboard, ReviewQueue, ReviewCase, UnreachedStudents, VerificationLayer, AdminLogin
-│   │   ├── services/               # adminApi.js
-│   │   ├── App.jsx                 # React Router routing setup
-│   │   ├── index.css               # Tailwind CSS styles
-│   │   └── main.jsx                # React root
-│   ├── package.json                # Node dependencies
-│   ├── vite.config.js              # Vite configuration
-│   ├── tailwind.config.js          # Tailwind CSS theme extension
-│   ├── Dockerfile                  # Production Nginx container
-│   └── nginx.conf                  # Nginx proxy configuration
-├── mobile_app/                     # Flutter Student Mobile App
+│   │   ├── components/                 # Header, Sidebar, StatCard, Toast, Layout
+│   │   ├── pages/                      # Dashboard, ReviewQueue, ReviewCase, UnreachedStudents, VerificationLayer, AdminLogin
+│   │   ├── services/                   # adminApi.js (connects to live backend)
+│   │   ├── App.jsx                     # React Router routes
+│   │   └── main.jsx                    # Application root
+│   ├── package.json                    # Dependencies & build scripts
+│   ├── vite.config.js                  # Vite bundler configuration
+│   └── tailwind.config.js              # Ministry UI design tokens
+├── mobile_app/                         # Flutter Student Mobile App (PWA & Native)
 │   ├── lib/
-│   │   ├── models/                 # profile, document, scheme, application, payment, notification, chat
-│   │   ├── providers/              # app_state.dart (ChangeNotifier managing all state)
-│   │   ├── screens/                # All 13 student screens (Landing, Login, Dashboard, Profile, Wallet, Schemes, Prep, Form, Verification, Tracking, Payments, Chat, Notifications)
-│   │   ├── services/               # api_service.dart (REST client + mock fallback)
-│   │   ├── theme/                  # app_theme.dart (MoTA Green, Saffron, Card themes)
-│   │   ├── widgets/                # StatusBadge, BottomNavBar
-│   │   └── main.dart               # MultiProvider + MaterialApp
-│   ├── test/                       # widget_test.dart smoke tests
-│   └── pubspec.yaml                # Flutter Dart dependencies
-└── docker-compose.yml              # Multi-tier container orchestrator
+│   │   ├── models/                     # Profile, Document, Scheme, Application, Payment, Chat
+│   │   ├── providers/                  # app_state.dart (Global reactive state management)
+│   │   ├── screens/                    # Dashboard, Documents, Scholarships, JagoChat, Payments, Profile, Login, Tracking
+│   │   ├── services/                   # api_service.dart (HTTP client & mock fallback)
+│   │   ├── theme/                      # app_theme.dart (Ministry Emerald Green & Saffron tokens)
+│   │   ├── widgets/                    # BottomNavBar (Persistent 4-tab bar), StatusBadge
+│   │   └── main.dart                   # MultiProvider root
+│   ├── web/                            # Web entrypoint & branding splash screen
+│   └── pubspec.yaml                    # Flutter dependencies
+├── dist/                               # Production Flutter web build (ready for static CDN)
+├── docs/                               # Architectural diagrams & specifications
+├── test_endpoints.py                   # Root endpoint validation script (15/15 tests)
+├── serve_flutter.py                    # Multi-threaded local Flutter Web server (Port 3000)
+└── render.yaml                         # Cloud deployment blueprint
 ```
 
 ---
