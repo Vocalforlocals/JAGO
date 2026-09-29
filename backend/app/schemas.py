@@ -238,7 +238,10 @@ class UnreachedStudentResponse(BaseModel):
 
 class OutreachRequest(BaseModel):
     student_ids: Optional[List[int]] = None
-    campaign_name: str = "National MoTA Saturation & Direct Outreach Drive"
+    campaign_name: str = "National Scholarship Saturation & Direct Outreach Drive"
+    channel: Optional[str] = "sms_regional"  # sms_regional, csc_mobile_camp, school_alert
+    target_district: Optional[str] = "All Districts"
+    language: Optional[str] = "hi"  # hi, san, or, en
 
 # --- JAGO Chatbot ---
 class ChatMessage(BaseModel):
