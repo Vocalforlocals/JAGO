@@ -2,7 +2,10 @@
   "name": "jago-platform",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "admin_dashboard"
+  ],
   "scripts": {
-    "build": "npm --prefix admin_dashboard install && npm --prefix admin_dashboard run build"
+    "build": "npm run build --workspace=admin_dashboard && node -e \"const fs = require('fs'); fs.cpSync('admin_dashboard/dist', 'dist', {recursive: true});\""
   }
 }
