@@ -17,14 +17,15 @@ class ApiService {
     }
     if (kIsWeb) {
       final host = Uri.base.host.isNotEmpty ? Uri.base.host : '127.0.0.1';
+      if (host != 'localhost' && host != '127.0.0.1' && !host.startsWith('192.168.') && !host.startsWith('10.')) {
+        return 'https://jago-dr69.onrender.com/api';
+      }
       return 'http://$host:8000/api';
     }
     if (defaultTargetPlatform == TargetPlatform.android) {
-      // 10.0.2.2 routes to host localhost in standard Android Emulator
-      // Fallback LAN address can also be used if on physical device
-      return 'http://10.0.2.2:8000/api';
+      return 'https://jago-dr69.onrender.com/api';
     }
-    return 'http://127.0.0.1:8000/api';
+    return 'https://jago-dr69.onrender.com/api';
   }
 
   static Future<void> saveToken(String token) async {
