@@ -121,7 +121,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          await appState.runEligibilityCheck();
+          await appState.refreshAllData();
         },
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

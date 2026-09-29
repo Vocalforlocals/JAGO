@@ -10,23 +10,27 @@ from .routes import auth, student, admin
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: ensure tables and seed data
+    # Startup: ensure tables and seed data if enabled
     Base.metadata.create_all(bind=engine)
-    seed_database()
+    if os.getenv("SEED_DEMO_DATA", "true").lower() in ("true", "1", "yes"):
+        seed_database()
     yield
     # Shutdown
 
 app = FastAPI(
-    title="JAGO Backend — Ministry of Tribal Affairs, Government of India",
-    description="Unified Scholarship Access & Multi-Source Verification Orchestrator for Tribal Students",
+    title="JAGO — National Unified Scholarship Platform",
+    description="Unified Scholarship Access & Multi-Source Verification Orchestrator for Students",
     version="1.0.0",
     lifespan=lifespan
 )
 
 # CORS setup
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "*")
+allowed_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins if allowed_origins else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,19 +45,20 @@ app.include_router(admin.router)
 def root():
     return {
         "project": "JAGO",
-        "tagline": "One Student. One Verified Profile. One Dashboard. Five Scholarship Schemes.",
-        "ministry": "Ministry of Tribal Affairs, Government of India",
-        "portal": "National ST Scholarship Verification & Sanction Portal",
+        "tagline": "One Student. One Verified Profile. One Dashboard. Multiple Scholarship Schemes.",
+        "portal": "National Scholarship Verification & Sanction Portal",
         "status": "online",
         "docs_url": "/docs"
     }
 
+@app.get("/health")
 @app.get("/api/health")
 def health_check():
+    db_type = "PostgreSQL" if "postgresql" in os.getenv("DATABASE_URL", "") else "SQLite"
     return {
         "status": "healthy",
         "service": "JAGO Unified Scholarship Engine",
         "timestamp": datetime.utcnow().isoformat() + "Z",
-        "database": "SQLite (jago.db)",
+        "database": db_type,
         "version": "1.0.0"
     }

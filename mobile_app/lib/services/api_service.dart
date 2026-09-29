@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/profile.dart';
 import '../models/document.dart';
 import '../models/scheme.dart';
@@ -8,13 +9,51 @@ import '../models/payment.dart';
 import '../models/notification_item.dart';
 
 class ApiService {
-  // Configured for FastAPI backend (supports localhost and mobile phone over LAN)
+  static const String _envApiUrl = String.fromEnvironment('API_URL', defaultValue: '');
+
   static String get baseUrl {
+    if (_envApiUrl.isNotEmpty) {
+      return _envApiUrl;
+    }
     if (kIsWeb) {
       final host = Uri.base.host.isNotEmpty ? Uri.base.host : '127.0.0.1';
       return 'http://$host:8000/api';
     }
-    return 'http://10.177.59.42:8000/api';
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      // 10.0.2.2 routes to host localhost in standard Android Emulator
+      // Fallback LAN address can also be used if on physical device
+      return 'http://10.0.2.2:8000/api';
+    }
+    return 'http://127.0.0.1:8000/api';
+  }
+
+  static Future<void> saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('access_token', token);
+  }
+
+  static Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('access_token');
+  }
+
+  static Future<void> clearToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('access_token');
+  }
+
+  static Future<Map<String, String>> authHeaders({Map<String, String>? extra}) async {
+    final token = await getToken();
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+    };
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+    if (extra != null) {
+      headers.addAll(extra);
+    }
+    return headers;
   }
 
   // --- Auth ---
@@ -33,7 +72,7 @@ class ApiService {
     }
     return {
       'success': true,
-      'message': 'OTP dispatched (Demo / Mock)',
+      'message': 'OTP dispatched (Sandbox)',
       'demo_otp': '123456',
     };
   }
@@ -46,7 +85,11 @@ class ApiService {
         body: jsonEncode({'mobile': mobile, 'otp': otp}),
       );
       if (res.statusCode == 200) {
-        return jsonDecode(res.body);
+        final data = jsonDecode(res.body);
+        if (data['access_token'] != null) {
+          await saveToken(data['access_token']);
+        }
+        return data;
       }
     } catch (e) {
       debugPrint('ApiService verifyOtp error: $e');
@@ -63,7 +106,11 @@ class ApiService {
     try {
       final res = await http.post(Uri.parse('$baseUrl/auth/demo-student-login'));
       if (res.statusCode == 200) {
-        return jsonDecode(res.body);
+        final data = jsonDecode(res.body);
+        if (data['access_token'] != null) {
+          await saveToken(data['access_token']);
+        }
+        return data;
       }
     } catch (e) {
       debugPrint('ApiService demoStudentLogin error: $e');
@@ -102,12 +149,15 @@ class ApiService {
         }),
       );
       if (res.statusCode == 200) {
-        return jsonDecode(res.body);
+        final data = jsonDecode(res.body);
+        if (data['access_token'] != null) {
+          await saveToken(data['access_token']);
+        }
+        return data;
       }
     } catch (e) {
       debugPrint('ApiService registerStudent error: $e');
     }
-    // Fallback mock
     return {
       'access_token': 'mock_new_student_token',
       'role': 'student',
@@ -119,7 +169,7 @@ class ApiService {
   // --- Profile ---
   static Future<StudentProfile> fetchProfile() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/student/profile'));
+      final res = await http.get(Uri.parse('$baseUrl/student/profile'), headers: await authHeaders());
       if (res.statusCode == 200) {
         return StudentProfile.fromJson(jsonDecode(res.body));
       }
@@ -137,7 +187,7 @@ class ApiService {
     try {
       final res = await http.post(
         Uri.parse('$baseUrl/student/profile/update-income'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await authHeaders(),
         body: jsonEncode({
           'certificate_number': certNumber,
           'annual_income': annualIncome,
@@ -161,7 +211,7 @@ class ApiService {
   // --- Documents ---
   static Future<List<DocumentItem>> fetchDocuments() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/student/documents'));
+      final res = await http.get(Uri.parse('$baseUrl/student/documents'), headers: await authHeaders());
       if (res.statusCode == 200) {
         final List data = jsonDecode(res.body);
         return data.map((d) => DocumentItem.fromJson(d)).toList();
@@ -174,7 +224,10 @@ class ApiService {
 
   static Future<Map<String, dynamic>> fetchAllFromDigiLocker() async {
     try {
-      final res = await http.post(Uri.parse('$baseUrl/student/documents/fetch-all-digilocker'));
+      final res = await http.post(
+        Uri.parse('$baseUrl/student/documents/fetch-all-digilocker'),
+        headers: await authHeaders(),
+      );
       if (res.statusCode == 200) {
         return jsonDecode(res.body);
       }
@@ -192,7 +245,7 @@ class ApiService {
     try {
       final res = await http.post(
         Uri.parse('$baseUrl/student/documents/upload'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await authHeaders(),
         body: jsonEncode({
           'doc_type': docType,
           'title': title,
@@ -215,7 +268,7 @@ class ApiService {
   // --- Schemes & Eligibility ---
   static Future<List<SchemeEligibility>> checkEligibility() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/student/eligibility'));
+      final res = await http.get(Uri.parse('$baseUrl/student/eligibility'), headers: await authHeaders());
       if (res.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(res.body);
         final List schemes = data['schemes'] ?? [];
@@ -237,7 +290,7 @@ class ApiService {
     try {
       final res = await http.post(
         Uri.parse('$baseUrl/student/applications'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await authHeaders(),
         body: jsonEncode({
           'scheme_id': schemeId,
           'bank_account': bankAccount,
@@ -263,6 +316,7 @@ class ApiService {
     try {
       final res = await http.post(
         Uri.parse('$baseUrl/student/applications/$applicationId/run-verification'),
+        headers: await authHeaders(),
       );
       if (res.statusCode == 200) {
         return jsonDecode(res.body);
@@ -286,7 +340,7 @@ class ApiService {
   // --- Payments & Notifications ---
   static Future<List<PaymentRecord>> fetchPayments() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/student/payments'));
+      final res = await http.get(Uri.parse('$baseUrl/student/payments'), headers: await authHeaders());
       if (res.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(res.body);
         final List history = data['history'] ?? [];
@@ -300,7 +354,7 @@ class ApiService {
 
   static Future<List<NotificationItem>> fetchNotifications() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/student/notifications'));
+      final res = await http.get(Uri.parse('$baseUrl/student/notifications'), headers: await authHeaders());
       if (res.statusCode == 200) {
         final List data = jsonDecode(res.body);
         return data.map((n) => NotificationItem.fromJson(n)).toList();
@@ -313,7 +367,10 @@ class ApiService {
 
   static Future<void> markNotificationRead(int notifId) async {
     try {
-      await http.post(Uri.parse('$baseUrl/student/notifications/$notifId/read'));
+      await http.post(
+        Uri.parse('$baseUrl/student/notifications/$notifId/read'),
+        headers: await authHeaders(),
+      );
     } catch (e) {
       debugPrint('ApiService markNotificationRead error: $e');
     }
@@ -324,7 +381,7 @@ class ApiService {
     try {
       final res = await http.post(
         Uri.parse('$baseUrl/student/jago-chat'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await authHeaders(),
         body: jsonEncode({'message': query, 'language': language}),
       );
       if (res.statusCode == 200) {
@@ -338,7 +395,7 @@ class ApiService {
     if (query.toLowerCase().contains('status')) {
       return {
         'reply': isHindi
-            ? 'आपके आवेदन संख्या ST-2026-001245 (Post-Matric) की स्थिति: सरकारी अधिकारी द्वारा समीक्षा जारी है।'
+            ? 'आपके आवेदन संख्या ST-2026-001245 (Post-Matric) की स्थिति: सरकारी समीक्षा जारी है।'
             : 'Your application ST-2026-001245 is currently Under Government Verification. It has been routed to the Manual Review queue for institutional alias verification.',
         'options': ['Check Payments', 'Required Documents', 'Help'],
       };

@@ -21,10 +21,12 @@ class ProfileScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         actions: [
           TextButton.icon(
-            onPressed: () {
+            onPressed: () async {
               final appState = Provider.of<AppState>(context, listen: false);
-              appState.logout();
-              Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+              await appState.logout();
+              if (context.mounted) {
+                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+              }
             },
             icon: const Icon(Icons.logout, size: 16, color: Colors.redAccent),
             label: const Text('Logout', style: TextStyle(fontSize: 12, color: Colors.redAccent)),

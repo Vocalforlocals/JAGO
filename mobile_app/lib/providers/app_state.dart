@@ -42,7 +42,18 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> _initData() async {
-    // Initial fetch from backend if running
+    try {
+      final token = await ApiService.getToken();
+      if (token != null && token.isNotEmpty) {
+        _isLoggedIn = true;
+        await _loadStudentData();
+      }
+    } catch (e) {
+      debugPrint('AppState init error: $e');
+    }
+  }
+
+  Future<void> _loadStudentData() async {
     try {
       _profile = await ApiService.fetchProfile();
       _documents = await ApiService.fetchDocuments();
@@ -51,22 +62,55 @@ class AppState extends ChangeNotifier {
       _notifications = await ApiService.fetchNotifications();
       notifyListeners();
     } catch (e) {
-      debugPrint('AppState init error: $e');
+      debugPrint('AppState _loadStudentData error: $e');
     }
   }
+
+  Future<void> refreshAllData() async {
+    _isLoading = true;
+    notifyListeners();
+    await _loadStudentData();
+    _isLoading = false;
+    notifyListeners();
+  }
+
 
   void setLanguage(String lang) {
     _language = lang;
     notifyListeners();
   }
 
-  Future<void> loginStudent() async {
+  Future<bool> loginStudent({String? mobile, String? otp}) async {
     _isLoading = true;
     notifyListeners();
-    await ApiService.demoStudentLogin();
-    _isLoggedIn = true;
+
+    try {
+      if (mobile != null && otp != null) {
+        final res = await ApiService.verifyOtp(mobile, otp);
+        if (res['access_token'] != null) {
+          _isLoggedIn = true;
+          await _loadStudentData();
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        }
+      } else {
+        final res = await ApiService.demoStudentLogin();
+        if (res['access_token'] != null) {
+          _isLoggedIn = true;
+          await _loadStudentData();
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        }
+      }
+    } catch (e) {
+      debugPrint('AppState loginStudent error: $e');
+    }
+
     _isLoading = false;
     notifyListeners();
+    return false;
   }
 
   Future<void> registerStudent({
@@ -99,23 +143,14 @@ class AppState extends ChangeNotifier {
       stCertificateNo: stCertificateNo,
     );
 
-    // Update local profile for immediate UI display
-    _profile = _profile.copyWith(
-      fullName: fullName,
-      studentId: 'ST2026-${(100 + (DateTime.now().millisecondsSinceEpoch % 899))}',
-      aadhaarMasked: aadhaarMasked,
-      domicile: domicile,
-      institution: institution,
-      course: course,
-      completionPercentage: 72,
-    );
-
     _isLoggedIn = true;
+    await _loadStudentData();
     _isLoading = false;
     notifyListeners();
   }
 
-  void logout() {
+  Future<void> logout() async {
+    await ApiService.clearToken();
     _isLoggedIn = false;
     _profile = StudentProfile.initialDemo();
     _documents = DocumentItem.defaultWallet();
@@ -137,24 +172,9 @@ class AppState extends ChangeNotifier {
       annualIncome: amount,
     );
 
-    // Update document in list
-    for (var doc in _documents) {
-      if (doc.docType == 'income_cert') {
-        doc.status = 'verified';
-      }
-    }
-
-    _notifications.insert(
-      0,
-      NotificationItem(
-        id: DateTime.now().millisecondsSinceEpoch,
-        title: 'Income Certificate Revalidated',
-        message: 'Your Income Certificate for FY 2026-27 was successfully verified via State Revenue repository and OCR cross-check.',
-        date: 'Just now',
-        isRead: false,
-        type: 'success',
-      ),
-    );
+    // Refresh documents and notifications
+    _documents = await ApiService.fetchDocuments();
+    _notifications = await ApiService.fetchNotifications();
 
     _isLoading = false;
     notifyListeners();
@@ -165,18 +185,11 @@ class AppState extends ChangeNotifier {
     notifyListeners();
 
     final res = await ApiService.fetchAllFromDigiLocker();
-
-    for (var doc in _documents) {
-      if (doc.docType != 'disability_cert') {
-        if (doc.docType != 'income_cert' || _profile.incomeStatus == 'verified') {
-          doc.status = 'verified';
-        }
-      }
-    }
+    _documents = await ApiService.fetchDocuments();
 
     _isLoading = false;
     notifyListeners();
-    return res['message'] ?? 'Fetched 5 documents from DigiLocker (Mock)';
+    return res['message'] ?? 'Documents updated from DigiLocker';
   }
 
   Future<String> uploadDocument(String docType, String title, String fileName) async {
@@ -184,30 +197,18 @@ class AppState extends ChangeNotifier {
     notifyListeners();
 
     final res = await ApiService.uploadDocument(docType, title, fileName);
-
-    for (var doc in _documents) {
-      if (doc.docType == docType) {
-        doc.status = 'verified';
-      }
-    }
-
-    if (docType == 'income_cert') {
-      _profile = _profile.copyWith(
-        incomeStatus: 'verified',
-        completionPercentage: 100,
-      );
-    }
+    _documents = await ApiService.fetchDocuments();
+    _profile = await ApiService.fetchProfile();
 
     _isLoading = false;
     notifyListeners();
-    return res['message'] ?? 'Document uploaded and verified (Mock)';
+    return res['message'] ?? 'Document uploaded successfully';
   }
 
   Future<void> runEligibilityCheck() async {
     _isLoading = true;
     notifyListeners();
 
-    await Future.delayed(const Duration(milliseconds: 900));
     _eligibility = await ApiService.checkEligibility();
 
     _isLoading = false;
@@ -222,7 +223,7 @@ class AppState extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    await ApiService.createApplication(
+    final res = await ApiService.createApplication(
       schemeId: schemeId,
       bankAccount: bankAccount,
       ifscCode: ifscCode,
@@ -230,19 +231,15 @@ class AppState extends ChangeNotifier {
     );
 
     _hasSubmittedApplication = true;
-    _application = ScholarshipApplication.demoApplication();
+    if (res['application_id'] != null) {
+      _application = _application.copyWith(
+        id: res['application_id'] is int ? res['application_id'] : 1,
+        appNumber: res['app_number'] ?? _application.appNumber,
+        submissionDate: res['submission_date'] ?? 'Today',
+      );
+    }
 
-    _notifications.insert(
-      0,
-      NotificationItem(
-        id: DateTime.now().millisecondsSinceEpoch,
-        title: 'Application Submitted successfully',
-        message: 'Your Post-Matric Scholarship application (ST-2026-001245) has been registered and scheduled for verification.',
-        date: 'Today',
-        isRead: false,
-        type: 'info',
-      ),
-    );
+    _notifications = await ApiService.fetchNotifications();
 
     _isLoading = false;
     notifyListeners();
@@ -252,22 +249,12 @@ class AppState extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    await ApiService.runVerification(_application.id);
+    final res = await ApiService.runVerification(_application.id);
 
     _application.stage = 'Under Verification';
-    _application.status = 'Routed to Manual Review';
+    _application.status = res['overall_status'] ?? 'Routed to Manual Review';
 
-    _notifications.insert(
-      0,
-      NotificationItem(
-        id: DateTime.now().millisecondsSinceEpoch,
-        title: 'Application Moved to Verification',
-        message: 'Institution alias discrepancy detected. Your application has been routed to the Manual Review Queue (Case #VR-10245).',
-        date: 'Today',
-        isRead: false,
-        type: 'info',
-      ),
-    );
+    _notifications = await ApiService.fetchNotifications();
 
     _isLoading = false;
     notifyListeners();

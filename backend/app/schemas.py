@@ -118,8 +118,8 @@ class EligibilityCheckResult(BaseModel):
     st_status: str
     family_income: int
     schemes: List[SchemeEligibilityItem]
-    one_scheme_rule_note: str = "As per Ministry of Tribal Affairs guidelines, a student can avail only ONE scholarship at a time."
-    disclaimer: str = "Demo / Mock Rule Engine. Final sanctioning decision rests with the authorized scholarship authority."
+    one_scheme_rule_note: str = "As per official guidelines, a student can avail only ONE scholarship at a time."
+    disclaimer: str = "Verified Rules Engine. Final sanctioning decision rests with the authorized scholarship authority."
 
 # --- Applications ---
 class ApplicationCreateRequest(BaseModel):

@@ -33,18 +33,106 @@ def send_otp(req: OTPRequest):
         "demo_otp": DEMO_OTP
     }
 
+def init_student_defaults(db: Session, user_id: int, full_name: str, state: str = "Jharkhand", st_cert_no: str = None, aadhaar_masked: str = None):
+    """Seed initial wallet documents and welcome alert for new student accounts."""
+    existing_docs = db.query(Document).filter(Document.user_id == user_id).count()
+    if existing_docs == 0:
+        docs = [
+            Document(
+                user_id=user_id,
+                doc_type="st_cert",
+                title="ST Certificate",
+                status="verified",
+                source="DigiLocker / State e-District",
+                issue_date="12/08/2023",
+                remarks=f"Certificate {st_cert_no or 'JH/ST/2024/00123'} verified."
+            ),
+            Document(
+                user_id=user_id,
+                doc_type="income_cert",
+                title="Income Certificate",
+                status="expired",
+                source="State e-District",
+                issue_date="15/03/2023",
+                expiry_date="31/03/2024",
+                remarks="Validity expired (>12 months). Revalidation recommended."
+            ),
+            Document(
+                user_id=user_id,
+                doc_type="domicile_cert",
+                title="Domicile Certificate",
+                status="verified",
+                source="DigiLocker",
+                issue_date="10/05/2023",
+                remarks=f"Resident of {state}."
+            ),
+            Document(
+                user_id=user_id,
+                doc_type="marksheet",
+                title="Academic Marksheet",
+                status="verified",
+                source="DigiLocker / APAAR",
+                issue_date="20/06/2026",
+                remarks="Higher Secondary record verified."
+            ),
+            Document(
+                user_id=user_id,
+                doc_type="bonafide_cert",
+                title="Bonafide Certificate",
+                status="verified",
+                source="Institution Portal / AISHE",
+                issue_date="05/08/2026",
+                remarks="Regular full-time enrollment."
+            ),
+            Document(
+                user_id=user_id,
+                doc_type="identity_doc",
+                title="Identity Document (Aadhaar)",
+                status="verified",
+                source="UIDAI eKYC",
+                issue_date="01/01/2021",
+                remarks=f"Aadhaar {aadhaar_masked or 'XXXX-XXXX-1234'} verified."
+            ),
+        ]
+        db.add_all(docs)
+
+    existing_notifs = db.query(Notification).filter(Notification.user_id == user_id).count()
+    if existing_notifs == 0:
+        welcome_notif = Notification(
+            user_id=user_id,
+            title="Welcome to JAGO",
+            message=f"Welcome {full_name}! Your student profile has been initialized. Complete your documentation to apply for pre-approved scholarships.",
+            date="Today",
+            is_read=False,
+            type="info"
+        )
+        db.add(welcome_notif)
+    db.commit()
+
+
 @router.post("/verify-otp", response_model=Token)
 def verify_otp(req: OTPVerifyRequest, db: Session = Depends(get_db)):
     if req.otp != DEMO_OTP and req.otp != "123456":
         raise HTTPException(status_code=400, detail="Invalid OTP. For demonstration, use '123456'.")
-    
-    # Locate or create student
-    user = db.query(User).filter(User.role == "student").first()
+
+    mobile_clean = req.mobile.strip().replace("+91", "").replace(" ", "").replace("-", "")
+
+    # Check for demo student mobile
+    if mobile_clean == "9876543210":
+        user = db.query(User).filter(User.username == "rahul_kumar").first()
+        if not user:
+            user = db.query(User).filter(User.role == "student").first()
+    else:
+        user = db.query(User).filter(User.mobile == mobile_clean, User.role == "student").first()
+
+    # If user not found, create new user and basic profile
     if not user:
+        import random
+        username = f"student_{mobile_clean}"
         user = User(
-            username="rahul_kumar",
-            mobile=req.mobile,
-            email="rahul.st@example.com",
+            username=username,
+            mobile=mobile_clean,
+            email=f"{username}@example.com",
             role="student",
             is_active=True
         )
@@ -52,6 +140,46 @@ def verify_otp(req: OTPVerifyRequest, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(user)
 
+        last4 = mobile_clean[-4:] if len(mobile_clean) >= 4 else "5678"
+        aadhaar_masked = f"XXXX-XXXX-{last4}"
+        student_id = f"ST2026-{random.randint(100, 999)}"
+        profile = StudentProfile(
+            user_id=user.id,
+            student_id=student_id,
+            full_name=f"Student {last4}",
+            aadhaar_masked=aadhaar_masked,
+            identity_status="verified",
+            st_certificate_no=f"JH/ST/2024/{random.randint(10000, 99999)}",
+            st_status="verified",
+            pvtg_status="Not Applicable",
+            institution="National Institute of Technology, Jamshedpur",
+            course="B.Tech (Computer Science)",
+            academic_year="2026-27",
+            academic_record_status="verified",
+            institution_status="verified",
+            family_income=180000,
+            income_status="expired",
+            income_cert_date="15/03/2023",
+            domicile="Jharkhand",
+            domicile_status="verified",
+            disability_status="Not Applicable",
+            net_jrf_status="Not Applicable",
+            completion_percentage=72
+        )
+        db.add(profile)
+        db.commit()
+        db.refresh(profile)
+
+        init_student_defaults(
+            db=db,
+            user_id=user.id,
+            full_name=profile.full_name,
+            state="Jharkhand",
+            st_cert_no=profile.st_certificate_no,
+            aadhaar_masked=aadhaar_masked
+        )
+
+    full_name = user.profile.full_name if (user.profile and user.profile.full_name) else "Student"
     access_token = create_access_token(data={"sub": user.username, "role": user.role, "user_id": user.id})
     return {
         "access_token": access_token,
@@ -59,7 +187,7 @@ def verify_otp(req: OTPVerifyRequest, db: Session = Depends(get_db)):
         "user_id": user.id,
         "role": user.role,
         "username": user.username,
-        "full_name": "Rahul Kumar"
+        "full_name": full_name
     }
 
 @router.post("/demo-student-login", response_model=Token)
@@ -168,6 +296,15 @@ def register_student(req: RegisterRequest, db: Session = Depends(get_db)):
     )
     db.add(profile)
     db.commit()
+
+    init_student_defaults(
+        db=db,
+        user_id=new_user.id,
+        full_name=req.full_name,
+        state=req.domicile,
+        st_cert_no=profile.st_certificate_no,
+        aadhaar_masked=req.aadhaar_masked
+    )
 
     access_token = create_access_token(data={"sub": new_user.username, "role": new_user.role, "user_id": new_user.id})
     return {

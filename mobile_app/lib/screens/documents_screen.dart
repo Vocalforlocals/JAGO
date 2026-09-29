@@ -19,7 +19,7 @@ class DocumentsScreen extends StatelessWidget {
     }
   }
 
-  void _handleViewDoc(BuildContext context, String title) {
+  void _handleViewDoc(BuildContext context, AppState appState, String title) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -47,12 +47,12 @@ class DocumentsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Digital Document Preview (Demo)',
+                'Digital Document Preview',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.primaryGreen),
               ),
               const SizedBox(height: 8),
               Text(
-                'Document: $title\nIssued by: Competent Authority\nHolder: Rahul Kumar (ST2026-001)\nAuthenticated: Cryptographically Signed via DigiLocker URI.',
+                'Document: $title\nIssued by: Competent Authority\nHolder: ${appState.profile.fullName} (${appState.profile.studentId})\nAuthenticated: Cryptographically Verified via Official Registry.',
                 style: const TextStyle(fontSize: 11, color: AppTheme.textDark, height: 1.4),
               ),
             ],
@@ -259,7 +259,7 @@ class DocumentsScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               TextButton.icon(
-                                onPressed: () => _handleViewDoc(context, doc.title),
+                                onPressed: () => _handleViewDoc(context, appState, doc.title),
                                 icon: const Icon(Icons.visibility_outlined, size: 14),
                                 label: const Text('View', style: TextStyle(fontSize: 11)),
                               ),

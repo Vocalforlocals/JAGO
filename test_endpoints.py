@@ -35,9 +35,27 @@ endpoints = [
 passed = 0
 failed = 0
 
+# Obtain student token for authenticated student routes
+token = None
+try:
+    auth_req = urllib.request.Request(
+        f"{BASE_URL}/auth/demo-student-login",
+        data=b"{}",
+        headers={"Content-Type": "application/json"},
+        method="POST"
+    )
+    with urllib.request.urlopen(auth_req, timeout=5) as res:
+        token_data = json.loads(res.read().decode("utf-8"))
+        token = token_data.get("access_token")
+        print("Obtained student token for tests.")
+except Exception as e:
+    print(f"Failed to obtain student token: {e}")
+
 for method, path, body in endpoints:
     url = BASE_URL + path
     headers = {"Content-Type": "application/json"} if body else {}
+    if path.startswith("/student/") and token:
+        headers["Authorization"] = f"Bearer {token}"
     data = json.dumps(body).encode("utf-8") if body else None
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..deps import get_current_student, get_optional_student
 from ..models import (
     User, StudentProfile, Document, Scheme, Application,
     VerificationRecord, ReviewCase, Payment, Notification
@@ -21,24 +22,25 @@ from ..services.jago_ai import JagoAIService
 
 router = APIRouter(prefix="/api/student", tags=["Student App"])
 
-def get_demo_student(db: Session) -> User:
-    student = db.query(User).filter(User.role == "student").first()
-    if not student:
-        raise HTTPException(status_code=404, detail="Student user not found in database.")
-    return student
-
 # 1. Profile
 @router.get("/profile", response_model=ProfileResponse)
-def get_profile(db: Session = Depends(get_db)):
-    student = get_demo_student(db)
+def get_profile(
+    current_student: User = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student = current_student
     profile = db.query(StudentProfile).filter(StudentProfile.user_id == student.id).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile record missing.")
     return profile
 
 @router.post("/profile/update-income", response_model=ProfileResponse)
-def update_income(req: IncomeUpdateRequest, db: Session = Depends(get_db)):
-    student = get_demo_student(db)
+def update_income(
+    req: IncomeUpdateRequest,
+    current_student: User = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student = current_student
     profile = db.query(StudentProfile).filter(StudentProfile.user_id == student.id).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile record missing.")
@@ -78,14 +80,20 @@ def update_income(req: IncomeUpdateRequest, db: Session = Depends(get_db)):
 
 # 2. Documents
 @router.get("/documents", response_model=List[DocumentResponse])
-def get_documents(db: Session = Depends(get_db)):
-    student = get_demo_student(db)
+def get_documents(
+    current_student: User = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student = current_student
     docs = db.query(Document).filter(Document.user_id == student.id).all()
     return docs
 
 @router.post("/documents/fetch-all-digilocker")
-async def fetch_all_digilocker(db: Session = Depends(get_db)):
-    student = get_demo_student(db)
+async def fetch_all_digilocker(
+    current_student: User = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student = current_student
     fetched_docs = await MockGovIntegrations.fetch_digilocker_documents(student.username)
     
     for item in fetched_docs:
@@ -106,8 +114,12 @@ async def fetch_all_digilocker(db: Session = Depends(get_db)):
     }
 
 @router.post("/documents/upload")
-def upload_document(req: DocumentUploadRequest, db: Session = Depends(get_db)):
-    student = get_demo_student(db)
+def upload_document(
+    req: DocumentUploadRequest,
+    current_student: User = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student = current_student
     doc = db.query(Document).filter(
         Document.user_id == student.id,
         Document.doc_type == req.doc_type
@@ -149,9 +161,19 @@ def get_schemes(db: Session = Depends(get_db)):
     return schemes
 
 @router.get("/eligibility", response_model=EligibilityCheckResult)
-def run_eligibility_check(db: Session = Depends(get_db)):
-    student = get_demo_student(db)
+def run_eligibility_check(
+    current_student: User = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student = current_student
     profile = db.query(StudentProfile).filter(StudentProfile.user_id == student.id).first()
+    income = profile.family_income if profile else 180000
+    st_verified = (profile.st_status == "verified") if profile else True
+
+    post_matric_eligible = st_verified and (income <= 250000)
+    top_class_eligible = st_verified and (income <= 600000)
+
+    income_in_lakhs = f"{income / 100000:.2f}L"
 
     schemes_data = [
         SchemeEligibilityItem(
@@ -163,28 +185,28 @@ def run_eligibility_check(db: Session = Depends(get_db)):
             status_badge="not_applicable",
             reason="Applicable exclusively for enrolled students in Class 9 and 10 in secondary schools.",
             action_allowed=False,
-            requirements_note="Student is currently pursuing higher secondary/undergraduate education (B.Tech)."
+            requirements_note=f"Student is enrolled in {profile.course if profile else 'higher education'}."
         ),
         SchemeEligibilityItem(
             scheme_id=2,
             code="post_matric",
             name="Post-Matric Scholarship for ST Students",
-            eligible=True,
-            status_label="Eligible",
-            status_badge="eligible",
-            reason="Verified ST category student pursuing recognized undergraduate degree (B.Tech) with annual family income (₹1.80L) under the ₹2.50L cap.",
-            action_allowed=True,
+            eligible=post_matric_eligible,
+            status_label="Eligible" if post_matric_eligible else "Income Exceeded",
+            status_badge="eligible" if post_matric_eligible else "not_eligible",
+            reason=f"Verified ST category student pursuing undergraduate studies with annual income (₹{income_in_lakhs}) {'under the ₹2.50L cap' if post_matric_eligible else 'exceeding the ₹2.50L ceiling'}.",
+            action_allowed=post_matric_eligible,
             requirements_note="One-time income certificate revalidation required before submission."
         ),
         SchemeEligibilityItem(
             scheme_id=3,
             code="top_class",
             name="Top Class Education Scheme for ST Students",
-            eligible=True,
-            status_label="Potentially Eligible",
-            status_badge="potentially_eligible",
-            reason="Meets academic and income criteria (ceiling ₹6.0L), but requires AISHE premier institution tier validation.",
-            action_allowed=True,
+            eligible=top_class_eligible,
+            status_label="Potentially Eligible" if top_class_eligible else "Not Eligible",
+            status_badge="potentially_eligible" if top_class_eligible else "not_eligible",
+            reason=f"Meets academic and income criteria (annual income ₹{income_in_lakhs} under ₹6.0L cap). Subject to AISHE premier institution tier validation.",
+            action_allowed=top_class_eligible,
             requirements_note="Institution name matching review will be required."
         ),
         SchemeEligibilityItem(
@@ -196,7 +218,7 @@ def run_eligibility_check(db: Session = Depends(get_db)):
             status_badge="not_eligible",
             reason="Exclusively applicable for candidates pursuing regular full-time Ph.D. or M.Phil degrees.",
             action_allowed=False,
-            requirements_note="Current enrolled course is B.Tech (Undergraduate)."
+            requirements_note=f"Current enrolled course is {profile.course if profile else 'undergraduate'}."
         ),
         SchemeEligibilityItem(
             scheme_id=5,
@@ -212,16 +234,20 @@ def run_eligibility_check(db: Session = Depends(get_db)):
     ]
 
     return EligibilityCheckResult(
-        student_name=profile.full_name if profile else "Rahul Kumar",
+        student_name=profile.full_name if profile else student.username,
         st_status=profile.st_status if profile else "verified",
-        family_income=profile.family_income if profile else 180000,
+        family_income=income,
         schemes=schemes_data
     )
 
 # 4. Applications
 @router.post("/applications")
-def create_application(req: ApplicationCreateRequest, db: Session = Depends(get_db)):
-    student = get_demo_student(db)
+def create_application(
+    req: ApplicationCreateRequest,
+    current_student: User = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student = current_student
     scheme = db.query(Scheme).filter(Scheme.id == req.scheme_id).first()
     if not scheme:
         scheme_name = "Post-Matric Scholarship for ST Students"
@@ -286,8 +312,11 @@ def create_application(req: ApplicationCreateRequest, db: Session = Depends(get_
     }
 
 @router.get("/applications")
-def list_applications(db: Session = Depends(get_db)):
-    student = get_demo_student(db)
+def list_applications(
+    current_student: User = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student = current_student
     apps = db.query(Application).filter(Application.student_id == student.id).all()
     result = []
     for a in apps:
@@ -307,11 +336,18 @@ def list_applications(db: Session = Depends(get_db)):
     return result
 
 @router.get("/applications/{id}")
-def get_application_detail(id: int, db: Session = Depends(get_db)):
+def get_application_detail(
+    id: int,
+    current_student: User = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
     app = db.query(Application).filter(Application.id == id).first()
     if not app:
         raise HTTPException(status_code=404, detail="Application not found.")
-    
+
+    if app.student_id != current_student.id and current_student.role != "officer":
+        raise HTTPException(status_code=403, detail="Unauthorized access to application.")
+
     sub_date = app.submission_date or datetime.datetime.now().strftime("%d %b %Y")
     timeline = [
         {"title": "Application Submitted", "date": sub_date, "status": "completed"},
@@ -352,12 +388,19 @@ def get_application_detail(id: int, db: Session = Depends(get_db)):
     }
 
 @router.post("/applications/{id}/run-verification")
-async def run_application_verification(id: int, db: Session = Depends(get_db)):
-    student = get_demo_student(db)
+async def run_application_verification(
+    id: int,
+    current_student: User = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student = current_student
     profile = db.query(StudentProfile).filter(StudentProfile.user_id == student.id).first()
     app = db.query(Application).filter(Application.id == id).first()
     if not app:
         raise HTTPException(status_code=404, detail="Application not found.")
+
+    if app.student_id != student.id:
+        raise HTTPException(status_code=403, detail="Unauthorized access to application.")
 
     # Execute orchestrator
     result = await VerificationOrchestrator.run_full_verification(id, profile)
@@ -379,22 +422,22 @@ async def run_application_verification(id: int, db: Session = Depends(get_db)):
     # Handle mismatch case
     if result["routed_to_review"]:
         app.stage = "Under Government Verification"
-        app.status = "Routed to MoTA Manual Review Queue"
+        app.status = "Routed to Manual Review Queue"
         app.last_updated = datetime.datetime.now().strftime("%d %b %Y")
 
         # Check or create ReviewCase in admin queue
-        case_no = "VR-10245"
+        case_no = f"VR-{app.id + 10000}"
         existing_case = db.query(ReviewCase).filter(ReviewCase.case_number == case_no).first()
         if not existing_case:
             rc = ReviewCase(
                 case_number=case_no,
                 application_id=app.id,
-                student_name=profile.full_name,
+                student_name=profile.full_name if profile else student.username,
                 issue_type="Institution mismatch",
                 priority="High",
                 status="Pending",
-                student_data={"institution": profile.institution},
-                authorized_data={"institution": "ABC Institute of Engineering"},
+                student_data={"institution": profile.institution if profile else ""},
+                authorized_data={"institution": "State Higher Education Registry"},
                 possible_reasons=[
                     "Student profile may use informal or abbreviated campus name",
                     "Institution record may need correction or alias addition",
@@ -407,7 +450,7 @@ async def run_application_verification(id: int, db: Session = Depends(get_db)):
         notif = Notification(
             user_id=student.id,
             title="Application Moved to Government Verification",
-            message="Your application has been routed to the MoTA Manual Review Queue for institution record alignment. No action is required from your side.",
+            message="Your application has been routed to the Manual Review Queue for institution record alignment. No action is required from your side.",
             date="Today",
             is_read=False,
             type="info"
@@ -419,13 +462,16 @@ async def run_application_verification(id: int, db: Session = Depends(get_db)):
 
 # 5. Payments
 @router.get("/payments", response_model=PaymentSummaryResponse)
-def get_payments(db: Session = Depends(get_db)):
-    student = get_demo_student(db)
+def get_payments(
+    current_student: User = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student = current_student
     payments = db.query(Payment).filter(Payment.student_id == student.id).all()
-    
-    total_sanctioned = sum(p.sanctioned_amount for p in payments) or 18000
-    total_received = sum(p.received_amount for p in payments) or 9000
-    pending_amount = sum(p.pending_amount for p in payments) or 9000
+
+    total_sanctioned = sum(p.sanctioned_amount for p in payments)
+    total_received = sum(p.received_amount for p in payments)
+    pending_amount = sum(p.pending_amount for p in payments)
 
     history = []
     for p in payments:
@@ -442,8 +488,11 @@ def get_payments(db: Session = Depends(get_db)):
             "bank_account": p.bank_account
         })
 
-    if not history:
-        # Default fallback payment record for demo
+    # If demo student and no payments, provide demo history
+    if not history and student.username == "rahul_kumar":
+        total_sanctioned = 18000
+        total_received = 9000
+        pending_amount = 9000
         history = [
             {
                 "id": 1,
@@ -468,14 +517,22 @@ def get_payments(db: Session = Depends(get_db)):
 
 # 6. Notifications
 @router.get("/notifications", response_model=List[NotificationResponse])
-def get_notifications(db: Session = Depends(get_db)):
-    student = get_demo_student(db)
+def get_notifications(
+    current_student: User = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student = current_student
     notifs = db.query(Notification).filter(Notification.user_id == student.id).order_by(Notification.id.desc()).all()
     return notifs
 
 @router.post("/notifications/{id}/read")
-def mark_notification_read(id: int, db: Session = Depends(get_db)):
-    notif = db.query(Notification).filter(Notification.id == id).first()
+def mark_notification_read(
+    id: int,
+    current_student: User = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student = current_student
+    notif = db.query(Notification).filter(Notification.id == id, Notification.user_id == student.id).first()
     if notif:
         notif.is_read = True
         db.commit()
@@ -483,10 +540,16 @@ def mark_notification_read(id: int, db: Session = Depends(get_db)):
 
 # 7. JAGO Chatbot
 @router.post("/jago-chat")
-def jago_chat(req: ChatRequest, db: Session = Depends(get_db)):
-    student = get_demo_student(db)
-    profile = db.query(StudentProfile).filter(StudentProfile.user_id == student.id).first()
-    apps = db.query(Application).filter(Application.student_id == student.id).all()
+def jago_chat(
+    req: ChatRequest,
+    current_student: User | None = Depends(get_optional_student),
+    db: Session = Depends(get_db),
+):
+    profile = None
+    apps = []
+    if current_student:
+        profile = db.query(StudentProfile).filter(StudentProfile.user_id == current_student.id).first()
+        apps = db.query(Application).filter(Application.student_id == current_student.id).all()
 
     response = JagoAIService.generate_response(
         query=req.message,

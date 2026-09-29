@@ -1,7 +1,7 @@
 """
 JAGO AI Chatbot Service
-State-Aware, Multilingual (English & Hindi) RAG Engine for Ministry of Tribal Affairs Schemes.
-Adheres strictly to approved MoTA knowledge base. Never hallucinates government policies.
+State-Aware, Multilingual (English & Hindi) Assistant for Central and State Scholarship Schemes.
+Adheres strictly to approved knowledge base and government scholarship policies.
 """
 
 from typing import Dict, Any, List, Optional
@@ -37,10 +37,10 @@ class JagoAIService:
         ],
         "rules": [
             "A student can avail only ONE scholarship at any given time across all Central and State government schemes.",
-            "Documents verified once via DigiLocker / State e-District are reusable across all 5 schemes without re-uploading.",
+            "Documents verified once via DigiLocker / State e-District are reusable across all schemes without re-uploading.",
             "Income certificate is valid for 1 financial year and must be revalidated upon expiry.",
             "Caste and Domicile certificates are permanent and do not require repeated verification unless invalidated.",
-            "Data discrepancies (like institution name spelling variations) are not rejected; they are routed to the MoTA Manual Review Queue."
+            "Data discrepancies (like institution name spelling variations) are not rejected; they are routed to the Manual Review Queue."
         ]
     }
 
@@ -72,8 +72,8 @@ class JagoAIService:
                     text = (
                         f"Your application **{app.app_number}** for **{app.scheme_name}** is currently at:\n\n"
                         f"• **Current Stage:** {app.stage}\n"
-                        f"• **Verification Status:** Routed to MoTA Manual Review (Institution Name Alignment Check)\n"
-                        f"• **Deficiency:** No deficiency pending on your end. The designated verification officer is reviewing the AISHE record alignment.\n\n"
+                        f"• **Verification Status:** Routed to Manual Review Queue (Institution Name Alignment Check)\n"
+                        f"• **Deficiency:** No deficiency pending on your end. The designated verification officer is reviewing the record alignment.\n\n"
                         f"You will receive an instant notification once approved."
                     )
                 return {
@@ -155,14 +155,20 @@ class JagoAIService:
                     "⚠️ *नियम: आप एक समय में केवल एक ही छात्रवृत्ति योजना का लाभ ले सकते हैं।*"
                 )
             else:
+                student_name = getattr(student_profile, "full_name", "Student") if student_profile else "Student"
+                student_code = getattr(student_profile, "student_id", "") if student_profile else ""
+                code_str = f" ({student_code})" if student_code else ""
+                income_amt = getattr(student_profile, "family_income", 180000) if student_profile else 180000
+                income_lakhs = f"{income_amt / 100000:.2f}L"
+
                 text = (
-                    "📋 **Scheme Eligibility for Rahul Kumar (ST2026-001):**\n\n"
-                    "1. ✅ **Post-Matric Scholarship for ST Students:** **Eligible** (B.Tech regular enrollment, ST verified, income ₹1.80L < ₹2.50L cap).\n"
-                    "2. 🟡 **Top Class Education Scheme:** **Potentially Eligible** (Pending AISHE premier institute designation match).\n"
-                    "3. ⚪ **Pre-Matric Scholarship:** Not Applicable (Strictly for Classes 9 & 10).\n"
-                    "4. ⚪ **National Fellowship (NFST):** Not Applicable (Requires full-time Ph.D./M.Phil enrollment).\n"
-                    "5. ⚪ **National Overseas Scholarship (NOS):** Not Applicable (Requires admission to foreign university ranked <= 500).\n\n"
-                    "⚠️ *Note: You can avail only ONE scholarship at a time across any government scheme.*"
+                    f"📋 **Scheme Eligibility for {student_name}{code_str}:**\n\n"
+                    f"1. ✅ **Post-Matric Scholarship for ST Students:** **Eligible** (Undergraduate studies, ST category verified, annual income ₹{income_lakhs} < ₹2.50L cap).\n"
+                    f"2. 🟡 **Top Class Education Scheme:** **Potentially Eligible** (Subject to premier institute designation check).\n"
+                    f"3. ⚪ **Pre-Matric Scholarship:** Not Applicable (Strictly for Classes 9 & 10).\n"
+                    f"4. ⚪ **National Fellowship (NFST):** Not Applicable (Requires full-time Ph.D./M.Phil enrollment).\n"
+                    f"5. ⚪ **National Overseas Scholarship (NOS):** Not Applicable (Requires admission to foreign university ranked <= 500).\n\n"
+                    f"⚠️ *Note: You can avail only ONE scholarship at a time across any government scheme.*"
                 )
             return {
                 "text": text,
@@ -174,7 +180,7 @@ class JagoAIService:
             if is_hindi:
                 text = (
                     "📝 **JAGO पर आवेदन करने के आसान चरण:**\n"
-                    "1. **प्रोफ़ाइल सत्यापन:** आपकी 92% जानकारी पहले से सत्यापित है।\n"
+                    "1. **प्रोफ़ाइल सत्यापन:** आपकी जानकारी पहले से सत्यापित है।\n"
                     "2. **दस्तावेज़ पुनर्सत्यापन:** केवल समाप्त हो चुके आय प्रमाण पत्र को अपडेट करें।\n"
                     "3. **योजना चयन:** 'My Scholarships' में जाकर 'Post-Matric Scholarship' चुनें।\n"
                     "4. **एक-क्लिक आवेदन:** बैंक खाता व घोषणा जांचकर सबमिट करें। किसी भी दोबारा फॉर्म भरने की आवश्यकता नहीं है!"
@@ -195,12 +201,12 @@ class JagoAIService:
         # 6. Default fallback
         if is_hindi:
             text = (
-                "मैं केवल जनजातीय कार्य मंत्रालय (MoTA) के अनुमोदित नियमों और आपकी छात्रवृत्ति स्थिति के आधार पर उत्तर देता हूँ। "
-                "अधिक जानकारी के लिए कृपया आधिकारिक पोर्टल tribal.nic.in पर संपर्क करें अथवा नीचे दिए गए त्वरित विकल्पों में से चुनें।"
+                "मैं केवल आधिकारिक छात्रवृत्ति नियमों और आपकी प्रोफ़ाइल स्थिति के आधार पर सहायता करता हूँ। "
+                "नीचे दिए गए त्वरित विकल्पों में से चुनें अथवा अपने संस्थान के छात्रवृत्ति नोडल अधिकारी से संपर्क करें।"
             )
         else:
             text = (
-                "I am JAGO, your dedicated scholarship assistant. I answer strictly based on approved Ministry of Tribal Affairs guidelines and your verified profile data.\n\n"
+                "I am JAGO, your dedicated scholarship assistant. I answer strictly based on approved government scholarship guidelines and your verified profile data.\n\n"
                 "If you need specific help, please select one of the quick options below or contact your institution scholarship nodal officer."
             )
         return {

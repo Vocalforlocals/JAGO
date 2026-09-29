@@ -70,6 +70,38 @@ class ScholarshipApplication {
     required this.timeline,
   });
 
+  ScholarshipApplication copyWith({
+    int? id,
+    String? appNumber,
+    int? schemeId,
+    String? schemeName,
+    String? stage,
+    String? status,
+    String? submissionDate,
+    String? lastUpdated,
+    String? bankAccount,
+    String? ifscCode,
+    String? deficiencyNotes,
+    List<VerificationStep>? verificationSteps,
+    List<TimelineStep>? timeline,
+  }) {
+    return ScholarshipApplication(
+      id: id ?? this.id,
+      appNumber: appNumber ?? this.appNumber,
+      schemeId: schemeId ?? this.schemeId,
+      schemeName: schemeName ?? this.schemeName,
+      stage: stage ?? this.stage,
+      status: status ?? this.status,
+      submissionDate: submissionDate ?? this.submissionDate,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+      bankAccount: bankAccount ?? this.bankAccount,
+      ifscCode: ifscCode ?? this.ifscCode,
+      deficiencyNotes: deficiencyNotes ?? this.deficiencyNotes,
+      verificationSteps: verificationSteps ?? this.verificationSteps,
+      timeline: timeline ?? this.timeline,
+    );
+  }
+
   static ScholarshipApplication demoApplication() {
     return ScholarshipApplication(
       id: 1,

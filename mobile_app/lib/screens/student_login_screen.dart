@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../providers/app_state.dart';
+import '../services/api_service.dart';
 import 'dashboard_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -82,40 +83,55 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
 
   // ── Login handlers ─────────────────────────────────────────────────────────
 
-  void _handleSendOtp() {
+  void _handleSendOtp() async {
     final mobile = _mobileController.text.trim();
     if (mobile.length != 10) {
       setState(() => _errorMessage = 'Please enter a valid 10-digit mobile number.');
       return;
     }
     setState(() { _isLoading = true; _errorMessage = null; });
-    Future.delayed(const Duration(milliseconds: 600), () {
-      if (!mounted) return;
-      setState(() { _isLoading = false; _otpSent = true; _otpController.text = '123456'; });
-      _showSnack('OTP 123456 sent to +91 $mobile (Sandbox)');
+    final res = await ApiService.sendOtp(mobile);
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+      _otpSent = true;
+      if (res['demo_otp'] != null) {
+        _otpController.text = res['demo_otp'].toString();
+      }
     });
+    _showSnack(res['message'] ?? 'OTP dispatched to +91 $mobile');
   }
 
   void _handleVerifyOtp() async {
-    if (_otpController.text.trim() != '123456') {
-      setState(() => _errorMessage = 'Invalid OTP. Demo OTP is 123456.');
+    final mobile = _mobileController.text.trim();
+    final otp = _otpController.text.trim();
+    if (otp.isEmpty) {
+      setState(() => _errorMessage = 'Please enter the 6-digit OTP.');
       return;
     }
     setState(() { _isLoading = true; _errorMessage = null; });
     final appState = Provider.of<AppState>(context, listen: false);
-    await appState.loginStudent();
+    final ok = await appState.loginStudent(mobile: mobile, otp: otp);
     if (!mounted) return;
     setState(() => _isLoading = false);
-    _goToDashboard();
+    if (ok) {
+      _goToDashboard();
+    } else {
+      setState(() => _errorMessage = 'Invalid OTP or network error. Please try again.');
+    }
   }
 
   void _handleDemoLogin() async {
-    setState(() => _isLoading = true);
+    setState(() { _isLoading = true; _errorMessage = null; });
     final appState = Provider.of<AppState>(context, listen: false);
-    await appState.loginStudent();
+    final ok = await appState.loginStudent();
     if (!mounted) return;
     setState(() => _isLoading = false);
-    _goToDashboard();
+    if (ok) {
+      _goToDashboard();
+    } else {
+      setState(() => _errorMessage = 'Could not authenticate demo student. Ensure backend is running.');
+    }
   }
 
   // ── Registration — Step 1: Aadhaar eKYC ────────────────────────────────────
