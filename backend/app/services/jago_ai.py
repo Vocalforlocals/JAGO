@@ -220,18 +220,29 @@ class JagoAIService:
             if has_expired_income:
                 if is_hindi:
                     text = (
-                        "⚠️ **ध्यान दें:** आपके प्रोफ़ाइल में आय प्रमाण पत्र (Income Certificate) की वैधता समाप्त हो चुकी है (12 महीने से अधिक पुराना)।\n\n"
-                        "आपको अपने आवेदन को आगे बढ़ाने के लिए वित्तीय वर्ष 2026-27 का नया आय प्रमाण पत्र DigiLocker या सीधे अपलोड करके पुनः सत्यापित करना होगा। अन्य सभी दस्तावेज़ (ST सर्टिफिकेट, आधार, अंकतालिका) पहले से पूरी तरह सत्यापित हैं।"
+                        "⚠️ **दस्तावेज़ डायग्नोस्टिक — आय प्रमाण पत्र नवीनीकरण मार्गदर्शिका:**\n\n"
+                        "• **समस्या:** आपका आय प्रमाण पत्र समाप्त (Expired) हो चुका है (12 महीने की वित्तीय वर्ष वैधता समाप्त)।\n"
+                        "• **अन्य दस्तावेज़:** आपका ST जाति प्रमाण पत्र, निवास और आधार **पूर्णतः सत्यापित** हैं और दोबारा बनवाने की आवश्यकता नहीं है।\n\n"
+                        "**📋 नवीनीकरण के 4 सरल चरण:**\n"
+                        "1. **राज्य पोर्टल:** अपने राज्य के ई-डिस्ट्रिक्ट पोर्टल (झारसेवा JharSewa / RTPS / ServicePlus) पर ऑनलाइन आवेदन करें।\n"
+                        "2. **आवश्यक कागजात:** राशन कार्ड / वेतन पर्ची, स्व-घोषणा पत्र एवं ग्राम प्रधान/मुखिया सत्यापन।\n"
+                        "3. **समय सीमा:** अंचल अधिकारी (CO) / तहसीलदार द्वारा 7-10 कार्य दिवसों में डिजिटल प्रमाण पत्र जारी होता है।\n"
+                        "4. **JAGO में डिजीलॉकर सिंक:** प्रमाण पत्र जारी होते ही JAGO ऐप में **'डिजीलॉकर से सिंक करें'** दबाएं — कहीं भी कागज़ जमा करने की आवश्यकता नहीं!"
                     )
                 else:
                     text = (
-                        "⚠️ **Attention Required:** Your **Income Certificate** has expired (validity exceeds 12 months).\n\n"
-                        "All other documents (ST Certificate, Aadhaar, Bonafide, Marksheet) are **✓ Verified** and permanently stored in your Document Wallet.\n\n"
-                        "Please go to your **Document Wallet** and upload your latest FY 2026-27 Income Certificate or fetch it directly via DigiLocker."
+                        "⚠️ **Document Diagnostic — Income Certificate Renewal Roadmap:**\n\n"
+                        "• **Deficiency:** Your Income Certificate has expired (validity exceeds the 12-month statutory ceiling under GFR).\n"
+                        "• **Permanent Documents:** Your ST Caste Certificate, Domicile, and Aadhaar are **100% Verified** and permanently valid.\n\n"
+                        "**📋 4-Step Renewal Pathway:**\n"
+                        "1. **State Portal Access:** Apply online via your State e-District portal (e.g., JharSewa in Jharkhand, RTPS in Bihar, or ServicePlus).\n"
+                        "2. **Required Enclosures:** Attach Ration Card / Salary Slip copy, Self-declaration form, and Panchayat Pradhan / Ward verification.\n"
+                        "3. **Processing Timeline:** Digitally issued by Tehsildar / Circle Officer (CO) within 7 to 10 working days.\n"
+                        "4. **One-Tap JAGO Sync:** Once generated, tap **'Fetch All via DigiLocker'** in JAGO — instant verification with zero physical paperwork!"
                     )
                 return {
                     "text": text,
-                    "options": ["Update Income Certificate", "Open Document Wallet", "Check Status"]
+                    "options": ["Open DigiLocker Vault", "Check Eligibility", "Scholarship Status"]
                 }
             else:
                 if is_hindi:
