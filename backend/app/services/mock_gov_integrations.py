@@ -14,6 +14,7 @@ Connected data sources:
 
 import asyncio
 from typing import Dict, Any
+from .fuzzy_matcher import FuzzyMatcher
 
 class MockGovIntegrations:
     @staticmethod
@@ -54,17 +55,19 @@ class MockGovIntegrations:
     @staticmethod
     async def verify_aishe_institution(institution_name: str) -> Dict[str, Any]:
         await asyncio.sleep(0.4)
-        # Realistic institution naming variance scenario handled gracefully by orchestrator
         source_official_name = "ABC Institute of Engineering"
-        is_mismatch = (institution_name != source_official_name)
+        match_info = FuzzyMatcher.match_institution(institution_name, source_official_name)
         
         return {
-            "source": "AISHE - Ministry of Education Database (Demo / Mock)",
-            "status": "mismatch" if is_mismatch else "verified",
+            "source": "AISHE - Higher Education Database (Demo / Mock)",
+            "status": match_info["status"],
             "student_record": institution_name,
             "source_record": source_official_name,
             "aishe_code": "C-49210",
-            "message": "AISHE directory listed name differs by abbreviation/suffix ('ABC Institute of Engineering' vs 'ABC Institute of Technology'). Routed for manual verification."
+            "similarity_percentage": match_info["similarity_percentage"],
+            "tier": match_info["tier"],
+            "message": f"AISHE alignment evaluated ({match_info['similarity_percentage']}% similarity). {match_info['action_desc']}",
+            "match_details": match_info
         }
 
     @staticmethod

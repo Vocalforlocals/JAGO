@@ -112,19 +112,45 @@ class VerificationOrchestrator:
         has_mismatch = any(step["status"] == "mismatch" for step in steps)
         has_action_required = any(step["status"] == "action_required" for step in steps)
 
+        inst_match = inst_res.get("match_details", {})
+        similarity_pct = inst_res.get("similarity_percentage", 65)
+
         if has_mismatch:
             overall_status = "Routed to Manual Review"
             routed_to_review = True
             mismatch_detail = {
-                "issue_type": "Institution Information Mismatch",
-                "title": "Institution Information Mismatch",
-                "message": "Your profile and the institutional record contain different institution names. Your application has NOT been automatically rejected.",
+                "issue_type": "Institution Information Variance",
+                "title": "Institutional Name Discrepancy",
+                "message": (
+                    f"Student profile and official AISHE record exhibit {similarity_pct}% alignment. "
+                    "In accordance with JAGO Zero-Rejection Policy, this application has NOT been disqualified and is routed for officer validation."
+                ),
                 "student_record": student_profile.institution,
-                "source_record": "ABC Institute of Engineering",
+                "source_record": inst_res.get("source_record", "ABC Institute of Engineering"),
+                "similarity_percentage": similarity_pct,
+                "tier": inst_res.get("tier", "Tier 2: Acceptable Tolerance Variance"),
+                "matched_tokens": inst_match.get("matched_tokens", []),
+                "differing_tokens": inst_match.get("differing_tokens", []),
+                "auto_rejected": False,
                 "possible_reasons": [
                     "Student profile may use informal or abbreviated campus name",
                     "Institution AISHE registration might use the parent trust name",
                     "Supporting bonafide or affiliation document will resolve the mismatch"
+                ]
+            }
+        elif has_action_required:
+            overall_status = "Action Required by Student"
+            routed_to_review = False
+            mismatch_detail = {
+                "issue_type": "Document Revalidation Required",
+                "title": "Certificate Validity Expired",
+                "message": "Income certificate exceeds the 12-month financial year validity ceiling. Revalidation via State e-District portal required.",
+                "student_record": f"Income Certificate date: {student_profile.income_cert_date}",
+                "source_record": "State Revenue Repository",
+                "auto_rejected": False,
+                "possible_reasons": [
+                    "Income certificate issued in previous financial year",
+                    "Annual revalidation required under General Financial Rules (GFR)"
                 ]
             }
         else:
