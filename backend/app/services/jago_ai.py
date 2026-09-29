@@ -5,6 +5,11 @@ Adheres strictly to approved knowledge base and government scholarship policies.
 """
 
 from typing import Dict, Any, List, Optional
+import logging
+import httpx
+from ..config import GEMINI_API_KEY
+
+logger = logging.getLogger(__name__)
 
 class JagoAIService:
     KNOWLEDGE_BASE = {
@@ -44,16 +49,135 @@ class JagoAIService:
         ]
     }
 
-    @staticmethod
+    @classmethod
+    def _call_gemini(
+        cls,
+        query: str,
+        student_profile: Optional[Any] = None,
+        applications: Optional[List[Any]] = None,
+        language: str = "en"
+    ) -> Optional[Dict[str, Any]]:
+        if not GEMINI_API_KEY:
+            return None
+
+        # Build student profile context
+        student_name = getattr(student_profile, "full_name", "Student") if student_profile else "Student"
+        student_code = getattr(student_profile, "student_id", "") if student_profile else "Unregistered"
+        income = getattr(student_profile, "family_income", None) if student_profile else None
+        income_str = f"₹{income:,}" if income is not None else "Not specified"
+        income_status = getattr(student_profile, "income_status", "unknown") if student_profile else "unknown"
+        course = getattr(student_profile, "course", "Not specified") if student_profile else "Not specified"
+        institution = getattr(student_profile, "institution", "Not specified") if student_profile else "Not specified"
+        tribe = getattr(student_profile, "tribe", "ST") if student_profile else "ST"
+        domicile = getattr(student_profile, "domicile", "Not specified") if student_profile else "Not specified"
+
+        apps_info = []
+        if applications:
+            for a in applications:
+                apps_info.append(
+                    f"- Application #{getattr(a, 'app_number', 'N/A')}: Scheme='{getattr(a, 'scheme_name', 'N/A')}', "
+                    f"Stage='{getattr(a, 'stage', 'N/A')}', Status='{getattr(a, 'status', 'N/A')}'"
+                )
+        apps_str = "\n".join(apps_info) if apps_info else "No active scholarship applications currently submitted."
+
+        system_prompt = (
+            "You are JAGO AI, an empathetic, highly knowledgeable official scholarship assistant on the JAGO "
+            "National Unified Scholarship Platform.\n\n"
+            "=== SCHOLARSHIP SCHEMES KNOWLEDGE BASE ===\n"
+            "1. Pre-Matric Scholarship for ST Students: Classes 9-10 in recognized schools, annual income <= 2.50 Lakh.\n"
+            "2. Post-Matric Scholarship for ST Students: Class 11, 12, ITI, Diploma, Undergraduate (B.Tech, BA, B.Sc), Postgraduate, income <= 2.50 Lakh. Full fee reimbursement + maintenance allowance.\n"
+            "3. Top Class Education Scheme for ST Students: Notified premier institutes (IITs, IIMs, NITs, AIIMS, NLUs), income <= 6.00 Lakh. Full tuition fee + living expenses + books + computer allowance.\n"
+            "4. National Fellowship for ST Students (NFST): Regular full-time M.Phil/Ph.D. in UGC universities. Merit/NET based. JRF 31k/mo, SRF 35k/mo.\n"
+            "5. National Overseas Scholarship (NOS): Master's/Ph.D. in top 500 foreign universities, income <= 8.00 Lakh.\n\n"
+            "=== PLATFORM POLICIES & RULES ===\n"
+            "- 'One Student, One Scholarship': A student can avail only ONE scholarship at a time across Central and State government schemes.\n"
+            "- Verified documents (Aadhaar, ST caste, domicile) stored in DigiLocker are permanently reusable across all schemes without re-upload.\n"
+            "- Income certificate is valid for 1 financial year and must be revalidated annually if expired.\n"
+            "- Minor institutional naming discrepancies (like spelling variations) are not rejected; they are auto-routed to the Manual Review Queue.\n\n"
+            f"=== CURRENT LOGGED-IN STUDENT CONTEXT ===\n"
+            f"- Name: {student_name}\n"
+            f"- Student ID: {student_code}\n"
+            f"- Category/Tribe: {tribe}\n"
+            f"- State of Domicile: {domicile}\n"
+            f"- Enrolled Institution: {institution}\n"
+            f"- Enrolled Course: {course}\n"
+            f"- Annual Family Income: {income_str} (Certificate status: {income_status})\n"
+            f"- Applications on file:\n{apps_str}\n\n"
+            "=== INSTRUCTIONS ===\n"
+            "1. Answer the student's question accurately, empathetically, and concisely using the above context.\n"
+            "2. Detect the language of the student's query (English, Hindi, Hinglish, Bengali, Marathi, etc.) and reply in the EXACT SAME language.\n"
+            "3. Use clean markdown formatting (bullet points, bold text) suitable for a mobile phone screen.\n"
+            "4. Never hallucinate rules outside the knowledge base. If unsure, advise the student to contact their institution nodal officer."
+        )
+
+        models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        for model in models:
+            try:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+                payload = {
+                    "system_instruction": {
+                        "parts": [{"text": system_prompt}]
+                    },
+                    "contents": [
+                        {
+                            "role": "user",
+                            "parts": [{"text": query}]
+                        }
+                    ],
+                    "generationConfig": {
+                        "temperature": 0.3,
+                        "maxOutputTokens": 800
+                    }
+                }
+                headers = {
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": GEMINI_API_KEY
+                }
+                with httpx.Client(timeout=8.0) as client:
+                    resp = client.post(url, json=payload, headers=headers)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        candidates = data.get("candidates", [])
+                        if candidates:
+                            parts = candidates[0].get("content", {}).get("parts", [])
+                            if parts and "text" in parts[0]:
+                                reply_text = parts[0]["text"]
+                                options = ["Check Eligibility", "Track Status", "Required Documents"]
+                                q_lower = query.lower()
+                                if "eligib" in q_lower or "पात्र" in q_lower:
+                                    options = ["Apply Now", "Required Documents", "One-Scheme Policy"]
+                                elif "status" in q_lower or "स्थिति" in q_lower:
+                                    options = ["Check Payments", "View Review Queue", "Contact Officer"]
+                                elif "doc" in q_lower or "income" in q_lower or "दस्तावेज़" in q_lower:
+                                    options = ["Upload Certificate", "DigiLocker Sync", "Eligibility Rules"]
+
+                                return {
+                                    "text": reply_text,
+                                    "options": options
+                                }
+            except Exception as e:
+                logger.warning(f"Gemini API request failed for model {model}: {e}")
+                continue
+
+        return None
+
+    @classmethod
     def generate_response(
+        cls,
         query: str,
         student_profile: Optional[Any] = None,
         applications: Optional[List[Any]] = None,
         language: str = "en"
     ) -> Dict[str, Any]:
         """
-        State-aware reply generation based on the student's real profile and application state.
+        State-aware reply generation using Google Gemini with fallback to local knowledge base.
         """
+        # 0. Attempt Gemini Generative AI response
+        gemini_res = cls._call_gemini(query, student_profile, applications, language)
+        if gemini_res:
+            return gemini_res
+
+        # Fallback to local rule-based responses
         q = query.lower().strip()
         is_hindi = (language == "hi")
 
